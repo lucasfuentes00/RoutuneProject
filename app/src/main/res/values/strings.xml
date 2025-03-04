@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_title">USB Serial For Android Example</string>
+    <string name="app_name">LayoutFinal</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_tools">Tools</string>
+    <string name="devices">USB Devices</string>
+</resources>
