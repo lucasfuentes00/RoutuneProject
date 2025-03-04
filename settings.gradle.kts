@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LayoutFinal"
+rootProject.name = "RoutuneProject"
 include(":app")
