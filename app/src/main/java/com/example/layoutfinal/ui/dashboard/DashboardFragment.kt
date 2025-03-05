@@ -1,5 +1,9 @@
 package com.example.layoutfinal.ui.dashboard
 
+import android.content.pm.PackageManager
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,23 +13,26 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.layoutfinal.R
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.PrintWriter
-import java.net.Socket
+import android.Manifest
+
+
+import org.jtransforms.fft.DoubleFFT_1D as FFT
+
+
 
 class DashboardFragment : Fragment() {
-    private lateinit var textView: TextView
-    private lateinit var ratingView: TextView
-    private lateinit var seekBar1: SeekBar
-    private lateinit var seekBar2: SeekBar
-    private lateinit var seekBar3: SeekBar
-    private lateinit var seekBar4: SeekBar
-    private val ipPc = "192.168.86.22"
-    private val port = 12345
+    private var audioRecord: AudioRecord? = null
+    private val sampleRate = 44100
+    private val bufferSize = AudioRecord.getMinBufferSize(
+        sampleRate,
+        AudioFormat.CHANNEL_IN_MONO,
+        AudioFormat.ENCODING_PCM_16BIT
+    ).coerceAtLeast(1024) // Ensure buffer size is at least 1024 bytes
+
+    private lateinit var tunerTextView: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,69 +45,112 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Initialize views
-        textView = view.findViewById(R.id.textView)
-        ratingView = view.findViewById(R.id.ratingView)
-        seekBar1 = view.findViewById(R.id.seekBar1)
-        seekBar2 = view.findViewById(R.id.seekBar2)
-        seekBar3 = view.findViewById(R.id.seekBar3)
-        seekBar4 = view.findViewById(R.id.seekBar4)
-        val button1 = view.findViewById<Button>(R.id.button1)
-
-        // Set SeekBar listeners
-        seekBar1.setOnSeekBarChangeListener(seekBarListener("Rating 1: "))
-        seekBar2.setOnSeekBarChangeListener(seekBarListener("Rating 2: "))
-        seekBar3.setOnSeekBarChangeListener(seekBarListener("Rating 3: "))
-        seekBar4.setOnSeekBarChangeListener(seekBarListener("Rating 4: "))
-
-        // Button Click Listener
-        button1.setOnClickListener {
-            textView.text = "Clicked button !"
-            val message = "Hola PC desde Android"
-            sendMessageToServer(ipPc, port, message)
+        tunerTextView = view.findViewById(R.id.tunerText)
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 1)
+        } else {
+            startTuner() // Start only if permission is granted
         }
+
     }
 
-    private fun seekBarListener(ratingText: String): SeekBar.OnSeekBarChangeListener {
-        return object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                ratingView.text = "$ratingText $progress"
-                sendMessageToServer(ipPc, port,"$ratingText $progress")
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+    private fun startTuner() {
+        if (bufferSize == AudioRecord.ERROR_BAD_VALUE || bufferSize == AudioRecord.ERROR) {
+            Log.e("AudioRecord", "Invalid buffer size: $bufferSize")
+            return
         }
-    }
 
-    private fun sendMessageToServer(serverIP: String, port: Int, message: String) {
+        audioRecord = AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            sampleRate,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            bufferSize
+        )
+
+        if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
+            Log.e("AudioRecord", "Failed to initialize AudioRecord")
+            return
+        }
+
+        val audioBuffer = ShortArray(bufferSize)
+        audioRecord?.startRecording() // Now it's safe to call this!
+
         Thread {
-            try {
-                //SEND
-                val socket = Socket(serverIP, port)
-                val out = PrintWriter(socket.getOutputStream(), true)
-                out.println(message) // 🔥 Send the custom message
-                Log.d("SocketConnection", "Attempting to connect to $serverIP:$port")
-
-                //RECIEVE
-                val inputStream = socket.getInputStream()
-                val buffer = ByteArray(1024)
-                val bytesRead = inputStream.read(buffer)
-                val response = String(buffer, 0, bytesRead)
-                Log.d("ServerResponse", "Response: $response")
-
-                // Update UI
-                requireActivity().runOnUiThread {
-                    if (response != null) {
-                        textView.text = "Server Response: $response"
-                    } else {
-                        textView.text = "No response from server."
-                    }
+            while (true) {
+                audioRecord?.read(audioBuffer, 0, bufferSize)
+                val frequency = getFrequency(audioBuffer)
+                val seminotes = getMusicalNoteAndCents(frequency)
+                activity?.runOnUiThread {
+                    tunerTextView.text = "Frequency: ${frequency}Hz -> Seminotes ${seminotes}"
                 }
-
-                socket.close()
-            } catch (e: IOException) {
-                Log.e("SocketError", "Error: ${e.message}", e)
             }
         }.start()
+    }
+
+
+    private fun getFrequency(audioData: ShortArray): Double {
+        val fftSize = audioData.size
+        val fftData = DoubleArray(fftSize)
+
+        // Convert audio data (ShortArray) to DoubleArray
+        for (i in audioData.indices) {
+            fftData[i] = audioData[i].toDouble()
+        }
+
+        // Perform FFT
+        val fft = FFT(fftData.size.toLong()) // Initialize FFT with the correct size
+        fft.realForward(fftData) // Compute the FFT in-place
+
+        // Find the dominant frequency
+        var maxIndex = 0
+        var maxMagnitude = 0.0
+
+        for (i in 0 until fftSize / 2) { // FFT output is half the original size
+            val real = fftData[2 * i]
+            val imag = fftData[2 * i + 1]
+            val magnitude = Math.sqrt(real * real + imag * imag)
+
+            if (magnitude > maxMagnitude) {
+                maxMagnitude = magnitude
+                maxIndex = i
+            }
+        }
+
+        return maxIndex * sampleRate.toDouble() / fftSize
+    }
+    fun getMusicalNoteAndCents(frequency: Double): Pair<String, Double> {
+        val adjustm = frequency*(2.9687)/(440 + 2.9687)
+        val semitones = 12 * Math.log((frequency -adjustm)/ (440)) / Math.log(2.0)
+        val noteIndex = Math.floorMod((semitones + 12).toInt(), 12)
+        // Starting from A (index 0)
+        val note = getNoteFromIndex(noteIndex)
+
+        // Calculate the cents of detune
+        val cents = 100 * semitones/12
+
+        return Pair(note, cents)
+    }
+
+    fun getNoteFromIndex(index: Int): String {
+        // Array of notes starting from A
+        val notes = arrayOf("A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#")
+        return notes[index]
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        audioRecord?.stop()
+        audioRecord?.release()
+    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startTuner()
+        } else {
+            Log.e("Permission", "Microphone permission denied")
+        }
     }
 }

@@ -8,14 +8,7 @@
     android:background="?attr/android:windowBackground"
     tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/inputMessage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:hint="Enter message"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
+
 
     <Button
         android:id="@+id/sendButton"
@@ -23,33 +16,14 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="36dp"
         android:text="Send"
-        app:layout_constraintBottom_toTopOf="@+id/ratingView"
-        app:layout_constraintEnd_toEndOf="@+id/responseText"
+        app:layout_constraintBottom_toTopOf="@+id/tunerText"
         app:layout_constraintHorizontal_bias="0.433"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/responseText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:paddingTop="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/sendButton"
-        tools:layout_editor_absoluteX="0dp" />
+
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="492dp"
-        android:text="Hello World!"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.452"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/ratingView"
+        android:id="@+id/tunerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="192dp"
@@ -59,70 +33,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Click Me"
-        android:onClick="updateText" />
-
-
-    <SeekBar
-        android:id="@+id/seekBar1"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="308dp"
-        android:progress="5"
-        android:rotation="270"
-        android:thumbOffset="@dimen/cardview_default_elevation"
-        app:flow_verticalStyle="packed"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.004"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <SeekBar
-        android:id="@+id/seekBar2"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="308dp"
-        android:progress="5"
-        android:rotation="270"
-        android:thumbOffset="@dimen/cardview_default_elevation"
-        app:flow_verticalStyle="packed"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.421"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <SeekBar
-        android:id="@+id/seekBar3"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="308dp"
-        android:progress="5"
-        android:rotation="270"
-        android:thumbOffset="@dimen/cardview_default_elevation"
-        app:flow_verticalStyle="packed"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.715"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    <SeekBar
-        android:id="@+id/seekBar4"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="316dp"
-        android:progress="5"
-        android:rotation="270"
-        android:thumbOffset="@dimen/cardview_default_elevation"
-        app:flow_verticalStyle="packed"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 
 
