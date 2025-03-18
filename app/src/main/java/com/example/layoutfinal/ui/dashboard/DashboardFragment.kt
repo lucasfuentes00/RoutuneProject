@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.layoutfinal.R
 import android.Manifest
+import androidx.core.app.NotificationCompat.getColor
 
 
 import org.jtransforms.fft.DoubleFFT_1D as FFT
@@ -33,6 +34,9 @@ class DashboardFragment : Fragment() {
     ).coerceAtLeast(1024) // Ensure buffer size is at least 1024 bytes
 
     private lateinit var tunerTextView: TextView
+    private lateinit var noteText: TextView
+    private lateinit var tunerSeekBar: SeekBar
+    private lateinit var centsText: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +47,10 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        noteText = view.findViewById(R.id.noteText)
+        tunerSeekBar = view.findViewById(R.id.tunerSeekBar)
+        tunerSeekBar.isEnabled = false
+        centsText = view.findViewById(R.id.centsText)
 
         // Initialize views
         tunerTextView = view.findViewById(R.id.tunerText)
@@ -51,7 +59,9 @@ class DashboardFragment : Fragment() {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 1)
         } else {
             startTuner() // Start only if permission is granted
+
         }
+
 
     }
 
@@ -81,12 +91,33 @@ class DashboardFragment : Fragment() {
             while (true) {
                 audioRecord?.read(audioBuffer, 0, bufferSize)
                 val frequency = getFrequency(audioBuffer)
-                val seminotes = getMusicalNoteAndCents(frequency)
+                val semiNotes = getMusicalNoteAndCents(frequency)
+                val (note, cents) = semiNotes// Asegúrate de que devuelve un par (nota, cents)
+
                 activity?.runOnUiThread {
-                    tunerTextView.text = "Frequency: ${frequency}Hz -> Seminotes ${seminotes}"
+                    val formattedCents = "%.3f".format(cents)
+                    // Actualizar el texto del afinador
+                    tunerTextView.text = "Frequency: ${frequency}Hz -> Note: $note, Cents: $formattedCents"
+
+                    // Actualizar el texto de los cents
+                    centsText.text = "Cents: $formattedCents"
+
+                    // Convertir cents (-50 a 50) a un rango de 0 a 100 para la SeekBar
+                    val progress = (cents ).coerceIn(0.0, 100.0)
+                    tunerSeekBar.progress = progress.toInt()
+
+                    // Cambiar color dependiendo de si está afinado
+                    if (cents.toInt() in -5..5) {
+                        noteText.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorRecieveText))
+                    } else {
+                        noteText.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorStatusText))
+                    }
                 }
+
+                Thread.sleep(50) // Pequeña pausa para evitar consumo excesivo de CPU
             }
         }.start()
+
     }
 
 
@@ -121,7 +152,7 @@ class DashboardFragment : Fragment() {
         return maxIndex * sampleRate.toDouble() / fftSize
     }
     fun getMusicalNoteAndCents(frequency: Double): Pair<String, Double> {
-        val adjustm = frequency*(2.9687)/(440 + 2.9687)
+        val adjustm = frequency*(1)/(440 + 2.9687)
         val semitones = 12 * Math.log((frequency -adjustm)/ (440)) / Math.log(2.0)
         val noteIndex = Math.floorMod((semitones + 12).toInt(), 12)
         // Starting from A (index 0)
@@ -153,4 +184,5 @@ class DashboardFragment : Fragment() {
             Log.e("Permission", "Microphone permission denied")
         }
     }
+
 }
