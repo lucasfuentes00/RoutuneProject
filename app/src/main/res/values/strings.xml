@@ -4,5 +4,8 @@
     <string name="title_settings">Metronome</string>
     <string name="title_dashboard">Tuner</string>
     <string name="title_tools">Games</string>
+    <string name="title_tuner">Tuner</string>
+    <string name="title_juegos">Games</string>
+    <string name="title_metronomo">Metronome</string>
     <string name="devices">USB Devices</string>
 </resources>
