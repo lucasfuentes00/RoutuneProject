@@ -1,4 +1,4 @@
-package com.example.layoutfinal  // Asegúrate de que este paquete sea el correcto
+package com.example.layoutfinal
 
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -33,12 +33,15 @@ class MetronomoFragment : Fragment() {
         // Cargar el archivo de sonido
         mediaPlayer = MediaPlayer.create(context, R.raw.tic_tac_sound)
 
+        // Habilitar el loop infinito
+        mediaPlayer.isLooping = true
+
         // Iniciar o detener el sonido cuando se presiona el botón
         playButton.setOnClickListener {
             if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
+                mediaPlayer.pause()  // Pausa el sonido
             } else {
-                mediaPlayer.start()
+                mediaPlayer.start()  // Reproduce el sonido
             }
         }
 
