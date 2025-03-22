@@ -1,32 +1,31 @@
 package com.example.layoutfinal.ui.dashboard
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.layoutfinal.R
-import android.Manifest
-import androidx.core.app.NotificationCompat.getColor
-
-
+import kotlinx.coroutines.*
 import org.jtransforms.fft.DoubleFFT_1D as FFT
-
-
+import kotlin.math.*
 
 class DashboardFragment : Fragment() {
     private var audioRecord: AudioRecord? = null
     private val sampleRate = 44100
+    private var isTuning = false // Flag to stop the loop
+
     private val bufferSize = AudioRecord.getMinBufferSize(
         sampleRate,
         AudioFormat.CHANNEL_IN_MONO,
@@ -47,22 +46,20 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         noteText = view.findViewById(R.id.noteText)
         tunerSeekBar = view.findViewById(R.id.tunerSeekBar)
         tunerSeekBar.isEnabled = false
         centsText = view.findViewById(R.id.centsText)
-
-        // Initialize views
         tunerTextView = view.findViewById(R.id.tunerText)
+
+        // Check microphone permission
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 1)
         } else {
             startTuner() // Start only if permission is granted
-
         }
-
-
     }
 
     private fun startTuner() {
@@ -84,64 +81,55 @@ class DashboardFragment : Fragment() {
             return
         }
 
-        val audioBuffer = ShortArray(bufferSize)
-        audioRecord?.startRecording() // Now it's safe to call this!
+        audioRecord?.startRecording()
+        isTuning = true
 
-        Thread {
-            while (true) {
+        CoroutineScope(Dispatchers.Default).launch {
+            val audioBuffer = ShortArray(bufferSize)
+
+            while (isTuning) {
                 audioRecord?.read(audioBuffer, 0, bufferSize)
                 val frequency = getFrequency(audioBuffer)
-                val semiNotes = getMusicalNoteAndCents(frequency)
-                val (note, cents) = semiNotes// Asegúrate de que devuelve un par (nota, cents)
+                val (note, cents) = getMusicalNoteAndCents(frequency)
 
-                activity?.runOnUiThread {
-                    val formattedCents = "%.3f".format(cents)
-                    // Actualizar el texto del afinador
-                    tunerTextView.text = "Frequency: ${frequency}Hz -> Note: $note, Cents: $formattedCents"
-
-                    // Actualizar el texto de los cents
-                    centsText.text = "Cents: $formattedCents"
-
-                    // Convertir cents (-50 a 50) a un rango de 0 a 100 para la SeekBar
-                    val progress = (cents ).coerceIn(0.0, 100.0)
-                    tunerSeekBar.progress = progress.toInt()
-
-                    // Cambiar color dependiendo de si está afinado
-                    if (cents.toInt() in -5..5) {
-                        noteText.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorRecieveText))
-                    } else {
-                        noteText.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorStatusText))
-                    }
+                withContext(Dispatchers.Main) {
+                    updateUI(frequency, note, cents)
                 }
 
-                Thread.sleep(50) // Pequeña pausa para evitar consumo excesivo de CPU
+                delay(50) // Small delay to avoid high CPU usage
             }
-        }.start()
-
+        }
     }
 
+    private fun updateUI(frequency: Double, note: String, cents: Int) {
+
+
+        tunerTextView.text = "Frequency: ${frequency}Hz -> Note: $note, Cents: $cents"
+        noteText.text = "Nota: $note"
+        centsText.text = "Cents: $cents"
+
+        val progress = ((cents + 50) * 100 / 100).coerceIn(0, 100)
+        tunerSeekBar.progress = progress.toInt()
+
+        // Change color if note is in tune (-5 to +5 cents)
+        val colorRes = if (cents in -10..10) R.color.colorRecieveText else R.color.colorStatusText
+        noteText.setTextColor(ContextCompat.getColor(requireContext(), colorRes))
+    }
 
     private fun getFrequency(audioData: ShortArray): Double {
         val fftSize = audioData.size
-        val fftData = DoubleArray(fftSize)
+        val fftData = DoubleArray(fftSize) { i -> audioData[i].toDouble() }
 
-        // Convert audio data (ShortArray) to DoubleArray
-        for (i in audioData.indices) {
-            fftData[i] = audioData[i].toDouble()
-        }
+        val fft = FFT(fftSize.toLong())
+        fft.realForward(fftData)
 
-        // Perform FFT
-        val fft = FFT(fftData.size.toLong()) // Initialize FFT with the correct size
-        fft.realForward(fftData) // Compute the FFT in-place
-
-        // Find the dominant frequency
         var maxIndex = 0
         var maxMagnitude = 0.0
 
-        for (i in 0 until fftSize / 2) { // FFT output is half the original size
+        for (i in 1 until fftSize / 2) { // Ignore DC component (i = 0)
             val real = fftData[2 * i]
             val imag = fftData[2 * i + 1]
-            val magnitude = Math.sqrt(real * real + imag * imag)
+            val magnitude = sqrt(real * real + imag * imag)
 
             if (magnitude > maxMagnitude) {
                 maxMagnitude = magnitude
@@ -151,38 +139,39 @@ class DashboardFragment : Fragment() {
 
         return maxIndex * sampleRate.toDouble() / fftSize
     }
-    fun getMusicalNoteAndCents(frequency: Double): Pair<String, Double> {
-        val adjustm = frequency*(1)/(440 + 2.9687)
-        val semitones = 12 * Math.log((frequency -adjustm)/ (440)) / Math.log(2.0)
-        val noteIndex = Math.floorMod((semitones + 12).toInt(), 12)
-        // Starting from A (index 0)
-        val note = getNoteFromIndex(noteIndex)
 
-        // Calculate the cents of detune
-        val cents = 100 * semitones/12
+    private fun getMusicalNoteAndCents(frequency: Double): Pair<String, Int> {
+        var f = abs(frequency)
 
+        val r = 2.0.pow(1.0 / 12.0)
+        val x = ln(frequency / 440.0) / ln(r)
+        val noteIndex = if (x >= 0) round(x).toInt() % 12 else round(x + 12).toInt() % 12
+        Log.d("Tuner"," noteIndex: $noteIndex")
+
+        var cents = round((x - floor(x)) * 100).toInt()
+
+        cents = when {
+            cents in 0..50 -> abs(cents)
+            cents > 50 -> -(100 - abs(cents))
+            cents < -50 -> 100 - abs(cents)
+            cents in -50..<0 -> -abs(cents)
+            cents == 100 -> 0
+            else -> cents
+        }
+
+        val note = getNoteFromIndex(abs(noteIndex))
         return Pair(note, cents)
     }
 
-    fun getNoteFromIndex(index: Int): String {
-        // Array of notes starting from A
+    private fun getNoteFromIndex(index: Int): String {
         val notes = arrayOf("A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#")
-        return notes[index]
+        return notes.getOrElse(index) { "-" }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
+        isTuning = false
         audioRecord?.stop()
         audioRecord?.release()
     }
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startTuner()
-        } else {
-            Log.e("Permission", "Microphone permission denied")
-        }
-    }
-
 }
