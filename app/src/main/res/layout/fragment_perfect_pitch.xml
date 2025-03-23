@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/perfect_pitch_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Teclado de piano: 12 botones en una fila -->
+    <LinearLayout
+        android:id="@+id/piano_keyboard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_note_0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="C" />
+
+        <!-- ... repite para las 12 notas ... -->
+
+        <Button
+            android:id="@+id/btn_note_11"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="B" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_play"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Play" />
+
+    <Button
+        android:id="@+id/btn_edit_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit selection" />
+
+    <Button
+        android:id="@+id/btn_view_statistics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View statistics" />
+
+    <LinearLayout
+        android:id="@+id/statistics_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- Aquí irían las gráficas/estadísticas -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Estadísticas aquí" />
+    </LinearLayout>
+</LinearLayout>
