@@ -5,19 +5,56 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <!-- Imagen del Metronomo -->
+    <!-- Imagen del Metronomo (más pequeña y movida hacia arriba) -->
     <ImageView
         android:id="@+id/metronomoImage"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="40dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="-50dp"
         android:src="@drawable/ic_metronomo"
         android:contentDescription="Metronomo Icon" />
 
-    <!-- Botón para iniciar el metronomo -->
+    <!-- Texto que muestra el BPM -->
+    <TextView
+        android:id="@+id/bpmTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="120 BPM"
+        android:textSize="24sp"
+        android:textColor="#000"
+        android:layout_marginTop="20dp"/>
+
+    <!-- Botón para iniciar el metrónomo -->
     <Button
         android:id="@+id/playButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Start Metronome" />
+
+    <!-- Botón para detener el metrónomo -->
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop Metronome" />
+
+    <!-- Botones para ajustar la velocidad -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <Button
+            android:id="@+id/increaseButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+" />
+
+        <Button
+            android:id="@+id/decreaseButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-" />
+    </LinearLayout>
 </LinearLayout>

@@ -10,4 +10,10 @@
     <color name="colorSendText">#82CAFF</color>
     <color name="colorStatusText">#FFDB58</color>
 
+    <color name="white_key_enabled">#FFFFFF</color>
+    <color name="black_key_enabled">#000000</color>
+    <color name="white_key_disabled">#CCCCCC</color>
+    <color name="black_key_disabled">#333333</color>
+
+
 </resources>

@@ -20,7 +20,18 @@
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="com.example.layoutfinal.ui.notifications.NotificationsFragment"
-        android:label="@string/title_tools"
-        tools:layout="@layout/fragment_notifications" />
+        android:name="com.example.layoutfinal.ui.games.GamesFragment"
+        android:label="Games"
+        tools:layout="@layout/fragment_games">
+        <action
+            android:id="@+id/action_gamesFragment_to_perfectPitchFragment"
+            app:destination="@id/perfectPitchFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/perfectPitchFragment"
+        android:name="com.example.layoutfinal.ui.games.PerfectPitchFragment"
+        android:label="Perfect Pitch"
+        tools:layout="@layout/fragment_perfect_pitch" />
+
 </navigation>

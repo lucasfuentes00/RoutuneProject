@@ -8,4 +8,17 @@
     <string name="title_juegos">Games</string>
     <string name="title_metronomo">Metronome</string>
     <string name="devices">USB Devices</string>
+
+    <string name="key_C">C</string>
+    <string name="key_Csharp">C♯</string>
+    <string name="key_D">D</string>
+    <string name="key_Dsharp">D♯</string>
+    <string name="key_E">E</string>
+    <string name="key_F">F</string>
+    <string name="key_Fsharp">F♯</string>
+    <string name="key_G">G</string>
+    <string name="key_Gsharp">G♯</string>
+    <string name="key_A">A</string>
+    <string name="key_Asharp">A♯</string>
+    <string name="key_B">B</string>
 </resources>
