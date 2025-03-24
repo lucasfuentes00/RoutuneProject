@@ -10,9 +10,11 @@ import android.os.SystemClock
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.layoutfinal.R
@@ -161,6 +163,12 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
             statsLayout.visibility =
                 if (statsLayout.visibility == View.VISIBLE) View.GONE else View.VISIBLE
         }
+        requireActivity().title = "Perfect Pitch"
+
+        (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        setHasOptionsMenu(true)
+
     }
 
     private fun startNewRound(
@@ -216,7 +224,6 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
         button.backgroundTintList = null
         button.background = ContextCompat.getDrawable(requireContext(), drawableRes)
 
-        // 👇 Traer teclas negras al frente cada vez
         if (isBlack) {
             button.bringToFront()
         }
@@ -224,8 +231,15 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
         (button.parent as? View)?.invalidate()
     }
 
-
-
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
