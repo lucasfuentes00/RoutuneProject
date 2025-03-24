@@ -1,43 +1,63 @@
 package com.example.layoutfinal.ui.home
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.layoutfinal.R
 import com.example.layoutfinal.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
 
-
-    private var _binding: FragmentHomeBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    private lateinit var metronomoImage: ImageView
+    private lateinit var playButton: Button
+    private lateinit var mediaPlayer: MediaPlayer
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        val homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_metronomo, container, false)
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        // Configurar la imagen y el botón
+        metronomoImage = view.findViewById(R.id.metronomoImage)
+        playButton = view.findViewById(R.id.playButton)
 
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        // Cargar la animación de rotación
+        val rotateAnimation = AnimationUtils.loadAnimation(context, R.anim.rotate_metronome)
+        metronomoImage.startAnimation(rotateAnimation)
+
+        // Cargar el archivo de sonido
+        mediaPlayer = MediaPlayer.create(context, R.raw.tic_tac_sound)
+
+        // Habilitar el loop infinito
+        mediaPlayer.isLooping = true
+
+        // Iniciar o detener el sonido cuando se presiona el botón
+        playButton.setOnClickListener {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()  // Pausa el sonido
+            } else {
+                mediaPlayer.start()  // Reproduce el sonido
+            }
         }
-        return root
+
+        return view
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onDestroy() {
+        super.onDestroy()
+        // Liberar recursos al destruir el fragmento
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.stop()
+        }
+        mediaPlayer.release()
     }
 }
