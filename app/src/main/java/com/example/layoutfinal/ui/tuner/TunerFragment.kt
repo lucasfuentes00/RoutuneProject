@@ -1,4 +1,4 @@
-package com.example.layoutfinal.ui.dashboard
+package com.example.layoutfinal.ui.tuner
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -6,8 +6,6 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +19,7 @@ import kotlinx.coroutines.*
 import org.jtransforms.fft.DoubleFFT_1D as FFT
 import kotlin.math.*
 
-class DashboardFragment : Fragment() {
+class TunerFragment : Fragment() {
     private var audioRecord: AudioRecord? = null
     private val sampleRate = 44100
     private var isTuning = false // Flag to stop the loop
@@ -41,7 +39,7 @@ class DashboardFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_dashboard, container, false)
+        return inflater.inflate(R.layout.fragment_tuner, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -88,7 +86,12 @@ class DashboardFragment : Fragment() {
             val audioBuffer = ShortArray(bufferSize)
 
             while (isTuning) {
-                audioRecord?.read(audioBuffer, 0, bufferSize)
+                val readResult = audioRecord?.read(audioBuffer, 0, bufferSize) ?: AudioRecord.ERROR_INVALID_OPERATION
+                if (readResult < 0) {
+                    Log.e("AudioRecord", "Error reading audio data: $readResult")
+                    break
+                }
+
                 val frequency = getFrequency(audioBuffer)
                 val (note, cents) = getMusicalNoteAndCents(frequency)
 
@@ -100,6 +103,8 @@ class DashboardFragment : Fragment() {
             }
         }
     }
+
+
 
     private fun updateUI(frequency: Double, note: String, cents: Int) {
 
@@ -168,10 +173,11 @@ class DashboardFragment : Fragment() {
         return notes.getOrElse(index) { "-" }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         isTuning = false
         audioRecord?.stop()
         audioRecord?.release()
+        audioRecord = null
     }
 }

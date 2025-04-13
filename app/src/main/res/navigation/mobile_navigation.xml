@@ -4,7 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
     android:background="?attr/android:windowBackground"
-    app:startDestination="@+id/navigation_dashboard">
+    app:startDestination="@+id/navigation_tuner">
+
+    <fragment
+        android:id="@+id/navigation_routine"
+        android:name="com.example.layoutfinal.ui.routine.RoutineFragment"
+        android:label="@string/title_routine"
+        tools:layout="@layout/fragment_routine" />
+    <fragment
+        android:id="@+id/navigation_loops"
+        android:name="com.example.layoutfinal.ui.loops.LoopsFragment"
+        android:label="@string/title_loops"
+        tools:layout="@layout/fragment_loops" />
 
     <fragment
         android:id="@+id/navigation_home"
@@ -13,10 +24,10 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.layoutfinal.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_tuner"
+        android:name="com.example.layoutfinal.ui.tuner.TunerFragment"
+        android:label="@string/title_tuner"
+        tools:layout="@layout/fragment_tuner" />
 
     <fragment
         android:id="@+id/navigation_notifications"

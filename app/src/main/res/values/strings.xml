@@ -2,9 +2,10 @@
     <string name="app_title">RoutuneProject</string>
     <string name="app_name">RoutuneProject</string>
     <string name="title_settings">Metronome</string>
-    <string name="title_dashboard">Tuner</string>
-    <string name="title_tools">Games</string>
     <string name="title_tuner">Tuner</string>
+    <string name="title_routine">Routine</string>
+    <string name="title_loops">Loops</string>
+    <string name="title_tools">Games</string>
     <string name="title_juegos">Games</string>
     <string name="title_metronomo">Metronome</string>
     <string name="devices">USB Devices</string>
@@ -21,4 +22,7 @@
     <string name="key_A">A</string>
     <string name="key_Asharp">A♯</string>
     <string name="key_B">B</string>
+
+    
+    <string name="loops">Loops</string>
 </resources>

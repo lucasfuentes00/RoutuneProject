@@ -1,10 +1,10 @@
-package com.example.layoutfinal.ui.dashboard
+package com.example.layoutfinal.ui.tuner
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class DashboardViewModel : ViewModel() {
+class TunerViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
         value = "This is settings Fragment"
