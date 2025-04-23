@@ -47,7 +47,7 @@ class StatisticsFragment : Fragment() {
         // Handle back button click
         backButton.setOnClickListener {
             // Go back to the RoutineFragment (parent fragment)
-            parentFragmentManager.popBackStack()
+            (parentFragment as? RoutineFragment)?.showRoutineUI()
         }
     }
 

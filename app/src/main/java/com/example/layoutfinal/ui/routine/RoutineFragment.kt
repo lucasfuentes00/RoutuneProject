@@ -51,7 +51,6 @@ class RoutineFragment : Fragment() {
                 val statisticsFragment = StatisticsFragment.newInstance(instrument.name)
                 childFragmentManager.beginTransaction()
                     .replace(R.id.statisticsFragmentContainer, statisticsFragment)
-                    .addToBackStack(null)  // Add to back stack to navigate back later
                     .commit()
             },
             onDeleteClick = { instrument ->
@@ -120,7 +119,19 @@ class RoutineFragment : Fragment() {
         view?.findViewById<TextView>(R.id.titleText)?.visibility = View.VISIBLE
 
         // Hide the statistics fragment container when coming back
+        //view?.findViewById<FrameLayout>(R.id.statisticsFragmentContainer)?.visibility = View.GONE
+    }
+
+    fun showRoutineUI() {
+        view?.findViewById<RecyclerView>(R.id.instrumentRecyclerView)?.visibility = View.VISIBLE
+        view?.findViewById<Button>(R.id.addInstrumentButton)?.visibility = View.VISIBLE
+        view?.findViewById<TextView>(R.id.titleText)?.visibility = View.VISIBLE
         view?.findViewById<FrameLayout>(R.id.statisticsFragmentContainer)?.visibility = View.GONE
+
+        // Optional: remove the statistics fragment
+        childFragmentManager.beginTransaction()
+            .remove(childFragmentManager.findFragmentById(R.id.statisticsFragmentContainer)!!)
+            .commit()
     }
 }
 
