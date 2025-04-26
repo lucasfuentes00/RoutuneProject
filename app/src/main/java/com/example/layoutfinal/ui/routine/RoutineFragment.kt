@@ -24,6 +24,8 @@ class RoutineFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: InstrumentAdapter
     val instrumentViewModel: InstrumentViewModel by activityViewModels()  // Using shared ViewModel
+    val routineSelectionViewModel: RoutineSelectionViewModel by activityViewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +42,8 @@ class RoutineFragment : Fragment() {
         // Use ViewModel's list of instruments
         adapter = InstrumentAdapter(instrumentViewModel.instruments,
             onItemClick = { instrument ->
+
+                routineSelectionViewModel.selectInstrument(instrument)
                 // Hide elements for statistics fragment
                 recyclerView.visibility = View.GONE
                 addButton.visibility = View.GONE
