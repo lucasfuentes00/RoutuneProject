@@ -1,8 +1,13 @@
 package com.example.layoutfinal.ui.routine
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 
-class InstrumentViewModel : ViewModel() {
-    // Lista de instrumentos
-    val instruments = mutableListOf<Instrument>()
+class InstrumentViewModel(application: Application) : AndroidViewModel(application) {
+    val instruments: MutableList<Instrument> =
+        InstrumentStorage.loadInstruments(application)
+
+    fun saveInstruments() {
+        InstrumentStorage.saveInstruments(getApplication(), instruments)
+    }
 }

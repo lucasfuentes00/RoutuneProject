@@ -16,6 +16,7 @@ class InstrumentAdapter(
 
     inner class InstrumentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val instrumentName: TextView = itemView.findViewById(R.id.instrumentName)
+        val instrumentDetails: TextView = itemView.findViewById(R.id.instrumentDetails)
         val deleteButton: Button = itemView.findViewById(R.id.deleteButton)
     }
 
@@ -28,7 +29,6 @@ class InstrumentAdapter(
     override fun onBindViewHolder(holder: InstrumentViewHolder, position: Int) {
         val instrument = instruments[position]
         holder.instrumentName.text = instrument.name
-
         holder.itemView.setOnClickListener {
             onItemClick(instrument)
         }

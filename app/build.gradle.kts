@@ -62,6 +62,9 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.8.8")
     implementation ("androidx.recyclerview:recyclerview:1.2.1")
 
+    implementation ("com.google.code.gson:gson:2.10.1")
+
+
 
 
 

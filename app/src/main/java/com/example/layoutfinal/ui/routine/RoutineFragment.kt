@@ -23,7 +23,7 @@ class RoutineFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: InstrumentAdapter
-    private val instrumentViewModel: InstrumentViewModel by activityViewModels()  // Using shared ViewModel
+    val instrumentViewModel: InstrumentViewModel by activityViewModels()  // Using shared ViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,6 +56,7 @@ class RoutineFragment : Fragment() {
             onDeleteClick = { instrument ->
                 instrumentViewModel.instruments.remove(instrument)  // Modify the ViewModel data
                 adapter.notifyDataSetChanged()
+                instrumentViewModel.saveInstruments()
             }
         )
 
@@ -79,8 +80,10 @@ class RoutineFragment : Fragment() {
             .setPositiveButton("Add") { _, _ ->
                 val name = editText.text.toString().trim()
                 if (name.isNotEmpty()) {
-                    instrumentViewModel.instruments.add(Instrument(name))  // Add to ViewModel
+                    instrumentViewModel.instruments.add(
+                        Instrument(name))
                     adapter.notifyItemInserted(instrumentViewModel.instruments.size - 1)
+                    instrumentViewModel.saveInstruments()
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -91,8 +94,9 @@ class RoutineFragment : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val name = v.text.toString().trim()
                 if (name.isNotEmpty()) {
-                    instrumentViewModel.instruments.add(Instrument(name))  // Add to ViewModel
+                    instrumentViewModel.instruments.add(Instrument(name))
                     adapter.notifyItemInserted(instrumentViewModel.instruments.size - 1)
+                    instrumentViewModel.saveInstruments()
                 }
                 hideKeyboard(v)
                 dialog.dismiss()

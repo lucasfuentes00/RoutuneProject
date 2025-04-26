@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,12 +10,22 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Instrument"
+            android:textStyle="bold"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/deleteButton"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/instrumentDetails"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Details"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/instrumentName"
+            app:layout_constraintStart_toStartOf="@id/instrumentName"
+            app:layout_constraintEnd_toStartOf="@id/deleteButton" />
 
         <Button
             android:id="@+id/deleteButton"
@@ -24,5 +34,5 @@
             android:text="Delete"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
