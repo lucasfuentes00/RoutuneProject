@@ -8,25 +8,30 @@
     android:layout_height="match_parent"
     android:background="?attr/android:windowBackground"
     android:paddingTop="?attr/actionBarSize">
+
     <TextView
         android:id="@+id/selectedInstrumentText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="244dp"
+        android:layout_marginTop="20dp"
         android:text="Select an Instrument"
         android:textSize="18sp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/routineSpinner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <Spinner
         android:id="@+id/routineSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.945"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.142"
-        tools:layout_editor_absoluteX="16dp" />
+        app:layout_constraintVertical_bias="0.109" />
 
     <fragment
         android:id="@+id/nav_host_fragment_activity_main"

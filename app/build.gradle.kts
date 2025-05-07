@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.media3.common.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,6 +64,11 @@ dependencies {
     implementation ("androidx.recyclerview:recyclerview:1.2.1")
 
     implementation ("com.google.code.gson:gson:2.10.1")
+    implementation ("androidx.recyclerview:recyclerview:1.2.1") // Use the latest version
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0") // Or the latest version
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0") // Or the latest version
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1") // Or the latest version for coroutines
 
 
 

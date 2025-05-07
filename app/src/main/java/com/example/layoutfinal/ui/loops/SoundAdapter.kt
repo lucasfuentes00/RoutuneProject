@@ -1,28 +1,47 @@
 package com.example.layoutfinal.ui.loops
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.layoutfinal.R
 import com.example.layoutfinal.databinding.ItemSoundBinding
-class SoundAdapter(private val sounds: List<Sound>) : RecyclerView.Adapter<SoundAdapter.SoundViewHolder>() {
 
-    // ViewHolder class that holds the view for each item in the list
-    inner class SoundViewHolder(val binding: ItemSoundBinding) : RecyclerView.ViewHolder(binding.root)
+class SoundAdapter(
+    private val soundList: List<Sound>,
+    private val onPlayClickListener: (Sound) -> Unit,
+    private val onDownloadClickListener: (Sound) -> Unit
+) : RecyclerView.Adapter<SoundAdapter.SoundViewHolder>() {
 
-    // Create new views (called by the layout manager)
+    class SoundViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val nameTextView: TextView = view.findViewById(R.id.soundName)
+        val durationTextView: TextView = view.findViewById(R.id.soundDuration)
+        val playButton: Button = view.findViewById(R.id.playButtonItem)
+        val downloadButton: Button = view.findViewById(R.id.downloadButtonItem)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SoundViewHolder {
-        val binding = ItemSoundBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return SoundViewHolder(binding)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.sound_item, parent, false)
+        return SoundViewHolder(view)
     }
 
-    // Replace the contents of a view (called by the layout manager)
     override fun onBindViewHolder(holder: SoundViewHolder, position: Int) {
-        val sound = sounds[position]
-        // Bind your sound data to the view holder here
-        holder.binding.soundName.text = sound.name // For example, assuming your Sound model has a 'name' property
-        // Handle clicks or other actions if needed
+        val sound = soundList[position]
+        holder.nameTextView.text = sound.name
+        holder.durationTextView.text = "Duration: ${sound.duration}s"
+
+        holder.playButton.setOnClickListener {
+            onPlayClickListener(sound)
+        }
+
+        holder.downloadButton.setOnClickListener {
+            onDownloadClickListener(sound)
+        }
     }
 
-    // Return the size of your list
-    override fun getItemCount(): Int = sounds.size
+    override fun getItemCount(): Int {
+        return soundList.size
+    }
 }

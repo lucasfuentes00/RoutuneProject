@@ -5,13 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.layoutfinal.R
 import com.example.layoutfinal.databinding.FragmentLoopsBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-// Make sure to import your Sound model and SoundAdapter classes
-
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -36,32 +34,26 @@ class LoopsFragment : Fragment() {
     ): View? {
         _binding = FragmentLoopsBinding.inflate(inflater, container, false)
 
-        // Configuramos el listener para el botón de búsqueda
-        binding.searchButton.setOnClickListener {
-            val query = binding.searchEditText.text.toString()
-            searchSounds(query)
+        // Set up button listeners
+        binding.btnSearch.setOnClickListener {
+            loadFragment(SearchFragment())
         }
+
+        binding.btnSounds.setOnClickListener {
+            loadFragment(SoundsFragment())
+        }
+
+        // Load the default fragment (e.g., SearchFragment)
+        loadFragment(SearchFragment())
 
         return binding.root
     }
 
-    private fun searchSounds(query: String) {
-        // Llamamos a la API de Freesound en un hilo separado
-        GlobalScope.launch(Dispatchers.Main) {
-            try {
-                // Llamamos a la API pasando el API key y Client ID en los parámetros
-                val response = apiService.searchSounds(query, clientId, "Bearer $apiKey")
-                displayResults(response.results)
-            } catch (e: Exception) {
-                e.printStackTrace() // Manejo de errores
-            }
-        }
-    }
-
-    private fun displayResults(sounds: List<Sound>) {
-        // Aquí puedes mostrar los resultados en una lista o Grid
-        val adapter = SoundAdapter(sounds)
-        binding.recyclerView.adapter = adapter
+    private fun loadFragment(fragment: Fragment) {
+        // Dynamically load the fragment into the FrameLayout
+        childFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
     }
 
     override fun onDestroyView() {
@@ -69,5 +61,3 @@ class LoopsFragment : Fragment() {
         _binding = null
     }
 }
-
-
