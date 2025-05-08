@@ -55,15 +55,13 @@ class StatisticsFragment : Fragment() {
             ?: return  // Instrument not found, exit early
 
         // Initialize the routineAdapter here
-        routineAdapter = RoutineAdapter(instrument.routines.toMutableList()) { routine ->
-            // Remove the routine from both instrument's list and adapter's list
+        routineAdapter = RoutineAdapter(instrument.routines) { routine ->
             instrument.routines.remove(routine)
-            routineAdapter.routines.remove(routine)
             routineAdapter.notifyDataSetChanged()
 
-            // Save updated data to ViewModel
             instrumentViewModel.saveInstruments()
         }
+
 
         routineRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         routineRecyclerView.adapter = routineAdapter
@@ -73,7 +71,6 @@ class StatisticsFragment : Fragment() {
             val builder = androidx.appcompat.app.AlertDialog.Builder(context)
             builder.setTitle("Enter Routine Name")
 
-            // Create EditText for input
             val input = EditText(context).apply {
                 hint = "Routine name"
                 imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
@@ -81,23 +78,17 @@ class StatisticsFragment : Fragment() {
             }
             builder.setView(input)
 
-            // Create the dialog
             val dialog = builder.create()
 
-            // Set up what happens when clicking "OK"
             dialog.setButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE, "OK") { _, _ ->
                 val routineName = input.text.toString().trim()
                 if (routineName.isNotEmpty()) {
                     val newRoutine = Routine(name = routineName, tempo = 120)
-                    val insertPosition = instrument.routines.size
-                    instrument.routines.add(newRoutine)
-                    Log.d("StatisticsFragment", "Routine added: ${newRoutine.name}, list size: ${instrument.routines.size}")
+                    instrument.routines.add(newRoutine) // modify only instrument.routines
 
-                    // Update the adapter's list and notify about the single insertion
-                    routineAdapter.routines.add(newRoutine)
+                    val insertPosition = instrument.routines.size - 1
                     routineAdapter.notifyItemInserted(insertPosition)
 
-                    // Save updated data to ViewModel
                     instrumentViewModel.saveInstruments()
                 }
                 dialog.dismiss()
@@ -107,7 +98,6 @@ class StatisticsFragment : Fragment() {
                 dialog.dismiss()
             }
 
-            // Handle pressing "Done" on keyboard
             input.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
                     dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)?.performClick()
@@ -116,9 +106,10 @@ class StatisticsFragment : Fragment() {
                     false
                 }
             }
-
             dialog.show()
         }
+
+
 
         backButton.setOnClickListener {
             (parentFragment as? RoutineFragment)?.showRoutineUI()

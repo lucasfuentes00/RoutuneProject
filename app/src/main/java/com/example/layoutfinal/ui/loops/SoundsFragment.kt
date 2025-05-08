@@ -9,9 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.layoutfinal.MainActivity
 import com.example.layoutfinal.databinding.FragmentSoundsBinding
+import com.example.layoutfinal.ui.routine.RoutineSelectionViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,7 +39,9 @@ class SoundsFragment : Fragment() {
     private val apiKey = "tyVR1A4eM0P7LnURQsxtn36ABunnHH1ad9ycAMdZ"
     private val soundIdsToFetch = listOf(39334, 245048)
     private val bpmSample = listOf(93, 97)
-    private var tempo = 96 // Normal speed
+    private var tempo = 96 // Default tempo
+
+    private lateinit var routineSelectionViewModel: RoutineSelectionViewModel
 
 
     private val retrofit = Retrofit.Builder()
@@ -54,7 +59,15 @@ class SoundsFragment : Fragment() {
     ): View {
         _binding = FragmentSoundsBinding.inflate(inflater, container, false)
 
-        soundPool = SoundPool.Builder()
+        // Initialize ViewModel (only if you still use it for other things, not for tempo)
+        routineSelectionViewModel = ViewModelProvider(requireActivity())[RoutineSelectionViewModel::class.java]
+
+        // Get the tempo from MainActivity
+        tempo = (activity as? MainActivity)?.getTempo() ?: 96
+        updateTempoText()
+
+
+    soundPool = SoundPool.Builder()
             .setMaxStreams(5)
             .build()
 
@@ -69,12 +82,14 @@ class SoundsFragment : Fragment() {
         )
         binding.recyclerViewSounds.adapter = soundAdapter
 
-        fetchSoundDetailsForMultipleIds()  // 🔥 This was missing!
+        fetchSoundDetailsForMultipleIds()
 
         binding.tempoUpButton.setOnClickListener {
             if (tempo < 110) {
                 tempo += 1
                 restartCurrentLoop()
+                (activity as? MainActivity)?.setTempo(tempo)
+
                 updateTempoText()
             }
         }
@@ -83,6 +98,7 @@ class SoundsFragment : Fragment() {
             if (tempo > 70) {
                 tempo -= 1
                 restartCurrentLoop()
+                (activity as? MainActivity)?.setTempo(tempo)
                 updateTempoText()
             }
         }
@@ -91,7 +107,6 @@ class SoundsFragment : Fragment() {
 
         return binding.root
     }
-
 
     private fun fetchSoundDetailsForMultipleIds() {
         lifecycleScope.launch(Dispatchers.IO) {
@@ -213,7 +228,7 @@ class SoundsFragment : Fragment() {
     }
 
     private fun showToast(message: String) {
-        if (!isAdded) return  // <- important! If fragment is not attached, do nothing
+        if (!isAdded) return
         lifecycleScope.launch(Dispatchers.Main) {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
@@ -233,10 +248,12 @@ class SoundsFragment : Fragment() {
             }
         }
     }
+
     private fun updateTempoText() {
         binding.textTempo.text = "Tempo: $tempo BPM"
     }
 
-
-
+    fun getCurrentTempo(): Int {
+        return tempo
+    }
 }

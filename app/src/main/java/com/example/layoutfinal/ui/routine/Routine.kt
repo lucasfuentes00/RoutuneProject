@@ -10,11 +10,11 @@ import java.util.Locale
 
 data class Routine(
     val name: String,
-    val tempo: Int = 120,
+    val tempo: Int = 90,
     val archived: Boolean = false,
     val date: String = currentDate(),
     val type: String = "Default"
-){
+) {
     companion object {
         fun currentDate(): String {
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
@@ -22,6 +22,7 @@ data class Routine(
         }
     }
 }
+
 
 object RoutineStorage {
 
