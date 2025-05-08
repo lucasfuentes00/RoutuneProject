@@ -12,15 +12,19 @@ import com.example.layoutfinal.databinding.ItemSoundBinding
 class SoundAdapter(
     private val soundList: List<Sound>,
     private val onPlayClickListener: (Sound) -> Unit,
-    private val onDownloadClickListener: (Sound) -> Unit
+    private val onStopClickListener: () -> Unit
 ) : RecyclerView.Adapter<SoundAdapter.SoundViewHolder>() {
+
+
+
 
     class SoundViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.soundName)
         val durationTextView: TextView = view.findViewById(R.id.soundDuration)
-        val playButton: Button = view.findViewById(R.id.playButtonItem)
-        val downloadButton: Button = view.findViewById(R.id.downloadButtonItem)
+        val playLoopButton: Button = view.findViewById(R.id.playLoopButtonItem)
+        val stopButton: Button = view.findViewById(R.id.stopButtonItem)
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SoundViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.sound_item, parent, false)
@@ -32,14 +36,17 @@ class SoundAdapter(
         holder.nameTextView.text = sound.name
         holder.durationTextView.text = "Duration: ${sound.duration}s"
 
-        holder.playButton.setOnClickListener {
+        holder.playLoopButton.setOnClickListener {
             onPlayClickListener(sound)
+            holder.stopButton.isEnabled = true
         }
 
-        holder.downloadButton.setOnClickListener {
-            onDownloadClickListener(sound)
+        holder.stopButton.setOnClickListener {
+            onStopClickListener()
+            holder.stopButton.isEnabled = false
         }
     }
+
 
     override fun getItemCount(): Int {
         return soundList.size

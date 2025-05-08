@@ -44,7 +44,7 @@ class LoopsFragment : Fragment() {
         }
 
         // Load the default fragment (e.g., SearchFragment)
-        loadFragment(SearchFragment())
+        loadFragment(SoundsFragment())
 
         return binding.root
     }

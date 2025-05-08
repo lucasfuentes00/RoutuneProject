@@ -1,5 +1,6 @@
 package com.example.layoutfinal.ui.loops
 
+import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -14,12 +15,11 @@ interface FreesoundApiService {
         @Header("Authorization") authHeader: String
     ): Response<SoundDetails>
 
-    @GET("sounds/search/")
+    @GET("search/text/")
     suspend fun searchSounds(
         @Query("query") query: String,
-        @Header("Authorization") authHeader: String,
-        s: String
-    ): Response<FreesoundResponse>
+        @Header("Authorization") authHeader: String
+    ): Response<SearchResponse>
 }
 
 data class Sound(
@@ -45,5 +45,21 @@ data class SoundDetails(
 data class Previews(
     val `preview-hq-mp3`: String?, // Ensure exact match with JSON key
     val `preview-lq-mp3`: String?  // Ensure exact match with JSON key
+)
+
+data class SearchResponse(
+    val results: List<SoundResult>
+)
+
+data class SoundResult(
+    val id: Int, // Add the id property
+    val name: String,
+    val duration: Double,
+    val license: String,
+    val previews: Previews? = null
+)
+
+data class PreviewUrls(
+    @SerializedName("preview-hq-mp3") val previewHqMp3: String
 )
 

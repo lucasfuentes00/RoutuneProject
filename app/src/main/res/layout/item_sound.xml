@@ -36,10 +36,10 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/playDownloadButtonItem"
+        android:id="@+id/playLoopButtonItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Play"
+        android:text="Play Loop"
         android:layout_marginStart="8dp" />
 
     <Button
@@ -49,5 +49,6 @@
         android:text="Stop"
         android:enabled="false"
         android:layout_marginStart="8dp" />
+
 
 </LinearLayout>

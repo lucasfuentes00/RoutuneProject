@@ -1,6 +1,6 @@
 package com.example.layoutfinal.ui.loops
 
-import android.media.MediaPlayer
+import android.media.SoundPool
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.layoutfinal.databinding.FragmentSoundsBinding
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,11 +28,16 @@ class SoundsFragment : Fragment() {
     private var _binding: FragmentSoundsBinding? = null
     private val binding get() = _binding!!
 
-    private var mediaPlayer: MediaPlayer? = null
-    private var currentPlayingUrl: String? = null
+    private lateinit var soundPool: SoundPool
+    private val soundIdMap = mutableMapOf<String, Int>()  // URL to soundId
+    private var currentStreamId: Int? = null
+    private var currentSoundUrl: String? = null
 
     private val apiKey = "tyVR1A4eM0P7LnURQsxtn36ABunnHH1ad9ycAMdZ"
-    private val soundIdsToFetch = listOf(39334, 300, 200)
+    private val soundIdsToFetch = listOf(39334, 245048)
+    private val bpmSample = listOf(93, 97)
+    private var tempo = 96 // Normal speed
+
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://freesound.org/apiv2/")
@@ -50,20 +54,44 @@ class SoundsFragment : Fragment() {
     ): View {
         _binding = FragmentSoundsBinding.inflate(inflater, container, false)
 
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(5)
+            .build()
+
         binding.recyclerViewSounds.layoutManager = LinearLayoutManager(requireContext())
         soundAdapter = SoundAdapter(soundList,
             onPlayClickListener = { sound ->
-                playPreview(sound.previewUrl)
+                playLoop(sound)
             },
-            onDownloadClickListener = { sound ->
-                downloadPreview(sound.previewUrl, sound.name)
-            })
+            onStopClickListener = {
+                stopLoop()
+            }
+        )
         binding.recyclerViewSounds.adapter = soundAdapter
 
-        fetchSoundDetailsForMultipleIds()
+        fetchSoundDetailsForMultipleIds()  // 🔥 This was missing!
+
+        binding.tempoUpButton.setOnClickListener {
+            if (tempo < 110) {
+                tempo += 1
+                restartCurrentLoop()
+                updateTempoText()
+            }
+        }
+
+        binding.tempoDownButton.setOnClickListener {
+            if (tempo > 70) {
+                tempo -= 1
+                restartCurrentLoop()
+                updateTempoText()
+            }
+        }
+
+        updateTempoText()
 
         return binding.root
     }
+
 
     private fun fetchSoundDetailsForMultipleIds() {
         lifecycleScope.launch(Dispatchers.IO) {
@@ -96,37 +124,51 @@ class SoundsFragment : Fragment() {
         }
     }
 
-    private fun playPreview(previewUrl: String) {
+    private fun playLoop(sound: Sound) {
+        val previewUrl = sound.previewUrl
         if (previewUrl.isEmpty()) {
             showToast("No preview URL available")
             return
         }
-        try {
-            mediaPlayer?.release()
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(previewUrl)
-                prepare()
-                start()
-                currentPlayingUrl = previewUrl
-                setOnCompletionListener { stopPlayback() }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val soundId = soundIdMap[previewUrl] ?: run {
+                val localFile = downloadPreviewToFile(previewUrl, sound.name)
+                if (localFile != null && localFile.exists()) {
+                    val id = soundPool.load(localFile.absolutePath, 1)
+                    soundIdMap[previewUrl] = id
+                    id
+                } else {
+                    withContext(Dispatchers.Main) {
+                        showToast("Error downloading sound")
+                    }
+                    return@launch
+                }
             }
-            showToast("Playing preview...")
-        } catch (e: IOException) {
-            showToast("Play error: ${e.localizedMessage}")
+
+            withContext(Dispatchers.Main) {
+                stopLoop()
+
+                // Find the BPM for the current sound
+                val index = soundList.indexOfFirst { it.previewUrl == previewUrl }
+                val originalBpm = if (index in bpmSample.indices) bpmSample[index] else 96 // fallback
+
+                val playbackRate = tempo.toFloat() / originalBpm
+                currentStreamId = soundPool.play(soundId, 1f, 1f, 1, -1, playbackRate)
+                currentSoundUrl = previewUrl
+                updateTempoText()
+                showToast("Playing loop...")
+            }
         }
     }
 
-    private fun downloadPreview(downloadUrl: String, soundName: String) {
-        if (downloadUrl.isEmpty()) {
-            showToast("No preview URL available for download")
-            return
-        }
 
-        lifecycleScope.launch(Dispatchers.IO) {
+    private suspend fun downloadPreviewToFile(url: String, soundName: String): File? {
+        return withContext(Dispatchers.IO) {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url(downloadUrl)
+                    .url(url)
                     .build()
 
                 val response = client.newCall(request).execute()
@@ -140,38 +182,61 @@ class SoundsFragment : Fragment() {
                             input.copyTo(output)
                         }
                     }
-
-                    withContext(Dispatchers.Main) {
-                        showToast("Downloaded: $fileName")
-                    }
+                    file
                 } else {
-                    showToast("Download failed: ${response.code}")
+                    null
                 }
             } catch (e: IOException) {
-                showToast("Download error: ${e.localizedMessage}")
+                Log.e("Download Error", e.localizedMessage ?: "Unknown error")
+                null
             }
         }
     }
 
-    private fun stopPlayback() {
-        mediaPlayer?.release()
-        mediaPlayer = null
-        currentPlayingUrl = null
+    private fun stopLoop() {
+        currentStreamId?.let {
+            soundPool.stop(it)
+        }
+        currentStreamId = null
+        currentSoundUrl = null
     }
 
     override fun onStop() {
         super.onStop()
-        stopPlayback()
-    }
-
-    private fun showToast(message: String) {
-        lifecycleScope.launch(Dispatchers.Main) {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-        }
+        stopLoop()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        soundPool.release()
     }
+
+    private fun showToast(message: String) {
+        if (!isAdded) return  // <- important! If fragment is not attached, do nothing
+        lifecycleScope.launch(Dispatchers.Main) {
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun restartCurrentLoop() {
+        currentSoundUrl?.let { url ->
+            val soundId = soundIdMap[url]
+            if (soundId != null) {
+                stopLoop()
+
+                val index = soundList.indexOfFirst { it.previewUrl == url }
+                val originalBpm = if (index in bpmSample.indices) bpmSample[index] else 96
+
+                val playbackRate = tempo.toFloat() / originalBpm
+                currentStreamId = soundPool.play(soundId, 1f, 1f, 1, -1, playbackRate)
+            }
+        }
+    }
+    private fun updateTempoText() {
+        binding.textTempo.text = "Tempo: $tempo BPM"
+    }
+
+
+
 }
