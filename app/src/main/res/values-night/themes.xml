@@ -22,5 +22,10 @@
 
         <!-- Accent Color -->
         <item name="colorAccent">#64B5F6</item> <!-- Light Blue Accent -->
+
+    </style>
+    <style name="AccentButton">
+        <item name="android:backgroundTint">@color/colorAccent</item>  <!-- Change color as needed -->
+        <item name="android:textColor">@android:color/white</item>
     </style>
 </resources>

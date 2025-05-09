@@ -10,7 +10,7 @@ import java.util.Locale
 
 data class Routine(
     val name: String,
-    val tempo: Int = 90,
+    var tempo: Int = 90,
     val archived: Boolean = false,
     val date: String = currentDate(),
     val type: String = "Default"

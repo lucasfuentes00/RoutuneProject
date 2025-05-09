@@ -1,58 +1,107 @@
 package com.example.layoutfinal.ui.loops
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import com.example.layoutfinal.R
+import androidx.lifecycle.ViewModelProvider
 import com.example.layoutfinal.databinding.FragmentLoopsBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.example.layoutfinal.ui.routine.RoutineSelectionViewModel
 
 class LoopsFragment : Fragment() {
 
     private var _binding: FragmentLoopsBinding? = null
     private val binding get() = _binding!!
+    private var tempoGlobal: Int = 90
 
-    private val retrofit = Retrofit.Builder()
-        .baseUrl("https://freesound.org/apiv2/") // URL base de la API de Freesound
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val apiService = retrofit.create(FreesoundApiService::class.java)
-
-    private val apiKey = "YOUR_API_KEY" // Coloca tu API Key aquí
-    private val clientId = "YOUR_CLIENT_ID" // Coloca tu Client ID aquí
+    private lateinit var routineSelectionViewModel: RoutineSelectionViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentLoopsBinding.inflate(inflater, container, false)
 
-        // Set up button listeners
-        binding.btnSearch.setOnClickListener {
-            loadFragment(SearchFragment())
-        }
+        routineSelectionViewModel = ViewModelProvider(requireActivity())[RoutineSelectionViewModel::class.java]
 
-        binding.btnSounds.setOnClickListener {
-            loadFragment(SoundsFragment())
-        }
-
-        // Load the default fragment (e.g., SearchFragment)
-        loadFragment(SoundsFragment())
+        setupTopbar()
+        setupButtons()
+        loadFragment(SoundsFragment(), "SoundFragmentTag") // <- ADD TAG
 
         return binding.root
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        // Dynamically load the fragment into the FrameLayout
+    private fun setupTopbar() {
+        val selectedInstrumentText = binding.selectedInstrumentTextLoops
+        val spinner = binding.routineSpinnerLoops
+        val saveButton = binding.saveButtonLoops
+
+        saveButton.setOnClickListener {
+            val selectedRoutine = routineSelectionViewModel.selectedRoutine.value
+            val tempo = tempoGlobal
+
+            if (selectedRoutine == null) {
+                Log.d("LoopsFragment", "No selected routine found.")
+            } else {
+                routineSelectionViewModel.saveRoutine(requireContext(), selectedRoutine, tempo)
+                Log.d("LoopsFragment", "Routine saved: ${selectedRoutine.name}, Tempo: $tempo")
+            }
+        }
+
+        routineSelectionViewModel.selectedInstrument.observe(viewLifecycleOwner) { instrument ->
+            instrument?.let {
+                selectedInstrumentText.text = "Instrument: ${it.name}"
+                val routineNames = it.routines.map { routine -> routine.name }
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, routineNames)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                spinner.adapter = adapter
+            }
+        }
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedRoutineName = parent.getItemAtPosition(position) as String
+                val selectedRoutine = routineSelectionViewModel.selectedInstrument.value?.routines?.find { it.name == selectedRoutineName }
+
+                selectedRoutine?.let {
+                    routineSelectionViewModel.selectRoutine(it)
+                    routineSelectionViewModel.updateTempo(it.tempo)
+
+                    updateTempoInSoundFragment(it.tempo)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+    }
+
+    fun updateTempoInLoopsFragment(newTempo: Int) {
+        tempoGlobal = newTempo
+        Log.d("LoopsFragment", "Tempo updated in LoopsFragment: $tempoGlobal BPM")
+    }
+
+    private fun updateTempoInSoundFragment(newTempo: Int) {
+        val soundFragment = childFragmentManager.findFragmentByTag("SoundFragmentTag") as? SoundsFragment
+        soundFragment?.updateTempoFromRoutine(newTempo)
+    }
+
+    private fun setupButtons() {
+        binding.btnSearch.setOnClickListener {
+            loadFragment(SearchFragment(), "SearchFragmentTag") // <- ADD TAG
+        }
+
+        binding.btnSounds.setOnClickListener {
+            loadFragment(SoundsFragment(), "SoundFragmentTag") // <- ADD TAG
+        }
+    }
+
+    private fun loadFragment(fragment: Fragment, tag: String) {
         childFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
+            .replace(binding.fragmentContainer.id, fragment, tag)
             .commit()
     }
 

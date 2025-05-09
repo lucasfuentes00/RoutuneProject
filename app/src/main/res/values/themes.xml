@@ -6,5 +6,11 @@
         <item name="colorOnPrimary">#FFFFFF</item> <!-- White text/icons -->
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowBackground">@color/colorPrimaryLight</item>
+
     </style>
+    <style name="AccentButton">
+        <item name="android:backgroundTint">@color/colorAccent</item>  <!-- Change color as needed -->
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
 </resources>

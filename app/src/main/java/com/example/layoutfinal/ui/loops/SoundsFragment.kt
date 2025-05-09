@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.layoutfinal.MainActivity
+import com.example.layoutfinal.R
 import com.example.layoutfinal.databinding.FragmentSoundsBinding
 import com.example.layoutfinal.ui.routine.RoutineSelectionViewModel
 import kotlinx.coroutines.Dispatchers
@@ -63,11 +64,11 @@ class SoundsFragment : Fragment() {
         routineSelectionViewModel = ViewModelProvider(requireActivity())[RoutineSelectionViewModel::class.java]
 
         // Get the tempo from MainActivity
-        tempo = (activity as? MainActivity)?.getTempo() ?: 96
+        Log.d("DEBUG", "Tempo fetched from MainActivity: $tempo") // Debugging the tempo value
+
         updateTempoText()
 
-
-    soundPool = SoundPool.Builder()
+        soundPool = SoundPool.Builder()
             .setMaxStreams(5)
             .build()
 
@@ -88,8 +89,6 @@ class SoundsFragment : Fragment() {
             if (tempo < 110) {
                 tempo += 1
                 restartCurrentLoop()
-                (activity as? MainActivity)?.setTempo(tempo)
-
                 updateTempoText()
             }
         }
@@ -98,7 +97,6 @@ class SoundsFragment : Fragment() {
             if (tempo > 70) {
                 tempo -= 1
                 restartCurrentLoop()
-                (activity as? MainActivity)?.setTempo(tempo)
                 updateTempoText()
             }
         }
@@ -177,7 +175,6 @@ class SoundsFragment : Fragment() {
         }
     }
 
-
     private suspend fun downloadPreviewToFile(url: String, soundName: String): File? {
         return withContext(Dispatchers.IO) {
             try {
@@ -251,6 +248,16 @@ class SoundsFragment : Fragment() {
 
     private fun updateTempoText() {
         binding.textTempo.text = "Tempo: $tempo BPM"
+        routineSelectionViewModel.updateTempo(tempo)
+        val loopsFragment = parentFragment as? LoopsFragment  // Accessing LoopsFragment from the parent
+        loopsFragment?.updateTempoInLoopsFragment(tempo)
+        Log.d("LoopsFragment", "new tempo, Tempo: $tempo BPM") // Logging routine name and tempo
+
+    }
+    fun updateTempoFromRoutine(newTempo: Int) {
+        tempo = newTempo
+        binding.textTempo.text = "Tempo: $tempo BPM" // Update the text
+        Log.d("SoundFragment", "Tempo updated in SoundFragment: $tempo BPM")
     }
 
     fun getCurrentTempo(): Int {

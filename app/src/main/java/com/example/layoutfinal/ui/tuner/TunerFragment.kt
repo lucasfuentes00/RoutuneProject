@@ -92,7 +92,7 @@ class TunerFragment : Fragment() {
                     break
                 }
 
-                val frequency = getFrequency(audioBuffer)
+                val frequency = getFrequency2(audioBuffer)
                 val (note, cents) = getMusicalNoteAndCents(frequency)
 
                 withContext(Dispatchers.Main) {
@@ -109,7 +109,7 @@ class TunerFragment : Fragment() {
     private fun updateUI(frequency: Double, note: String, cents: Int) {
 
 
-        tunerTextView.text = "Frequency: ${frequency}Hz -> Note: $note, Cents: $cents"
+        //tunerTextView.text = "Frequency: ${frequency}Hz -> Note: $note, Cents: $cents"
         noteText.text = "Nota: $note"
         centsText.text = "Cents: $cents"
 
@@ -123,50 +123,102 @@ class TunerFragment : Fragment() {
 
     private fun getFrequency(audioData: ShortArray): Double {
         val fftSize = audioData.size
-        val fftData = DoubleArray(fftSize) { i -> audioData[i].toDouble() }
+        val fftData = DoubleArray(fftSize * 2) { i ->
+            if (i < fftSize) audioData[i].toDouble() else 0.0
+        }
 
         val fft = FFT(fftSize.toLong())
         fft.realForward(fftData)
 
         var maxIndex = 0
-        var maxMagnitude = 0.0
+        var maxMagnitudeSquared = 0.0
 
-        for (i in 1 until fftSize / 2) { // Ignore DC component (i = 0)
-            val real = fftData[2 * i]
-            val imag = fftData[2 * i + 1]
-            val magnitude = sqrt(real * real + imag * imag)
+        // Empezar desde el segundo "bin" para evitar la componente DC (índice 0)
+        for (i in 2 until fftSize step 2) {
+            val real = fftData[i]
+            val imag = fftData[i + 1]
+            val magnitudeSquared = real * real + imag * imag
 
-            if (magnitude > maxMagnitude) {
-                maxMagnitude = magnitude
-                maxIndex = i
+            if (magnitudeSquared > maxMagnitudeSquared) {
+                maxMagnitudeSquared = magnitudeSquared
+                maxIndex = i / 2 // El índice de frecuencia es la mitad del índice en fftData
             }
         }
 
         return maxIndex * sampleRate.toDouble() / fftSize
     }
+    private fun getFrequency2(audioData: ShortArray): Double {
+        val buffer = audioData.map { it.toDouble() }.toDoubleArray()
+        val bufferSize = buffer.size
+        val yinBuffer = DoubleArray(bufferSize / 2)
 
-    private fun getMusicalNoteAndCents(frequency: Double): Pair<String, Int> {
-        var f = abs(frequency)
-
-        val r = 2.0.pow(1.0 / 12.0)
-        val x = ln(frequency / 440.0) / ln(r)
-        val noteIndex = if (x >= 0) round(x).toInt() % 12 else round(x + 12).toInt() % 12
-        Log.d("Tuner"," noteIndex: $noteIndex")
-
-        var cents = round((x - floor(x)) * 100).toInt()
-
-        cents = when {
-            cents in 0..50 -> abs(cents)
-            cents > 50 -> -(100 - abs(cents))
-            cents < -50 -> 100 - abs(cents)
-            cents in -50..<0 -> -abs(cents)
-            cents == 100 -> 0
-            else -> cents
+        // Paso 1: Función de diferencia
+        for (tau in 1 until yinBuffer.size) {
+            var sum = 0.0
+            for (i in 0 until bufferSize - tau) { // Corregido el límite del bucle
+                val delta = buffer[i] - buffer[i + tau]
+                sum += delta * delta
+            }
+            yinBuffer[tau] = sum
         }
 
-        val note = getNoteFromIndex(abs(noteIndex))
+        // Paso 2: Diferencia media acumulativa normalizada
+        yinBuffer[0] = 1.0
+        var runningSum = 0.0
+        for (tau in 1 until yinBuffer.size) {
+            runningSum += yinBuffer[tau]
+            yinBuffer[tau] /= (runningSum / tau).coerceAtLeast(1e-9) // Normalización y evitar división por cero
+        }
+
+        // Paso 3: Umbral absoluto
+        val threshold = 0.15
+        var tauEstimate = -1
+        var tau = 2
+        while (tau < yinBuffer.size) {
+            if (yinBuffer[tau] < threshold) {
+                while (tau + 1 < yinBuffer.size && yinBuffer[tau + 1] < yinBuffer[tau]) {
+                    tau++
+                }
+                tauEstimate = tau
+                break
+            }
+            tau++
+        }
+
+
+        if (tauEstimate == -1) {
+            return -1.0 // No se encontró tono
+        }
+
+        // Paso 4: Interpolación parabólica (opcional para mejorar la precisión)
+        val betterTau = if (tauEstimate > 0 && tauEstimate < yinBuffer.size - 1) {
+            val s0 = yinBuffer[tauEstimate - 1]
+            val s1 = yinBuffer[tauEstimate]
+            val s2 = yinBuffer[tauEstimate + 1]
+            tauEstimate + (s2 - s0) / (2 * (2 * s1 - s2 - s0))
+        } else {
+            tauEstimate.toDouble()
+        }
+
+        return sampleRate / betterTau
+    }
+
+
+
+    private fun getMusicalNoteAndCents(frequency: Double): Pair<String, Int> {
+        if (frequency <= 0.0) return Pair("-", 0)
+
+        val r = 2.0.pow(1.0 / 12.0) // Ratio entre semitonos
+        val x = ln(frequency / 440.0) / ln(r) // Distancia en semitonos desde A4
+        val semitoneIndex = round(x).toInt()
+        val noteIndex = (semitoneIndex ).mod(12) // Ajuste para que A=0
+        val note = getNoteFromIndex(noteIndex)
+
+        val cents = ((x - semitoneIndex) * 100).roundToInt()
+
         return Pair(note, cents)
     }
+
 
     private fun getNoteFromIndex(index: Int): String {
         val notes = arrayOf("A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#")
