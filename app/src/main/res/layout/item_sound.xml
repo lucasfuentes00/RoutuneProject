@@ -27,10 +27,10 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/soundLicense"
+            android:id="@+id/sound"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="License"
+            android:text=""
             android:textSize="14sp" />
 
     </LinearLayout>

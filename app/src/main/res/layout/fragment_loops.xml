@@ -39,6 +39,14 @@
             android:text="Save"/>
     </LinearLayout>
 
+    <View
+        android:id="@+id/separator"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" app:layout_constraintTop_toBottomOf="@+id/topbarLoops"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <LinearLayout
         android:id="@+id/buttonsLayout"
         android:orientation="horizontal"
@@ -46,15 +54,13 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/topbarLoops">
-
-        <Button
-            android:id="@+id/btnSounds"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sounds"
-            style="@style/AccentButton"
-            android:layout_marginStart="16dp"/>
+        app:layout_constraintTop_toBottomOf="@+id/separator"> <Button
+        android:id="@+id/btnSounds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sounds"
+        style="@style/AccentButton"
+        android:layout_marginStart="16dp"/>
 
         <Button
             android:id="@+id/btnSearch"

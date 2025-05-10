@@ -1,10 +1,12 @@
 package com.example.layoutfinal.ui.routine
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
 
 class RoutineSelectionViewModel : ViewModel() {
 
@@ -14,48 +16,73 @@ class RoutineSelectionViewModel : ViewModel() {
     private val _selectedInstrument = MutableLiveData<Instrument?>()
     val selectedInstrument: LiveData<Instrument?> get() = _selectedInstrument
 
-    // MutableLiveData for tempo
     private val _tempo = MutableLiveData<Int>()
     val tempo: LiveData<Int> get() = _tempo
 
-    // Select routine and set the tempo to the default or previously saved one
+    private var prefs: SharedPreferences? = null
+    private val gson = Gson()
+
+    fun initialize(context: Context) {
+        prefs = context.getSharedPreferences("RoutinePrefs", Context.MODE_PRIVATE)
+        loadSavedState()
+    }
+
+    private fun saveSelectedInstrument(instrument: Instrument?) {
+        prefs?.edit()?.putString("selectedInstrument", instrument?.let { gson.toJson(it) })?.apply()
+    }
+
+    private fun saveSelectedRoutine(routine: Routine?) {
+        prefs?.edit()?.putString("selectedRoutine", routine?.let { gson.toJson(it) })?.apply()
+    }
+
+    private fun loadSavedState() {
+        val savedInstrumentJson = prefs?.getString("selectedInstrument", null)
+        _selectedInstrument.value = savedInstrumentJson?.let { gson.fromJson(it, Instrument::class.java) }
+
+        val savedRoutineJson = prefs?.getString("selectedRoutine", null)
+        val loadedRoutine = savedRoutineJson?.let { gson.fromJson(it, Routine::class.java) }
+        _selectedRoutine.value = loadedRoutine
+        _tempo.value = loadedRoutine?.tempo ?: 90 // Load routine tempo or default
+    }
+
     fun selectRoutine(routine: Routine) {
         _selectedRoutine.value = routine
-        _tempo.value = routine.tempo // Set the tempo of the selected routine
-        Log.d("LoopsFragment", "Selected routine: ${routine.name},  ${_tempo.value} BPM") // Logging actual tempo value
-
+        _tempo.value = routine.tempo
+        saveSelectedRoutine(routine)
+        Log.d("RoutineViewModel", "Selected routine: ${routine.name}, ${_tempo.value} BPM")
     }
 
-    // Select instrument and reset selected routine
     fun selectInstrument(instrument: Instrument) {
         _selectedInstrument.value = instrument
-        _selectedRoutine.value = null // Reset selected routine when a new instrument is selected
-        _tempo.value = 90 // Default tempo (or set based on your app logic)
+        _selectedRoutine.value = null
+        _tempo.value = 90
+        saveSelectedInstrument(instrument)
+        saveSelectedRoutine(null) // Clear any selected routine when instrument changes
     }
 
-    // Update the tempo
     fun updateTempo(newTempo: Int) {
         _tempo.value = newTempo
-        Log.d("LoopsFragment", "RoutineSelectionViewModel Tempo: ${_tempo.value} BPM") // Logging actual tempo value
-
+        // No need to save tempo here directly, it's saved with the routine
     }
 
-    // Modify the saveRoutine function to accept selectedRoutine and tempo
     fun saveRoutine(context: Context, selectedRoutine: Routine, tempo: Int?) {
-        val currentRoutine = selectedRoutine // Use the passed selectedRoutine
+        val currentRoutine = selectedRoutine
         if (tempo != null) {
-            Log.d("LoopsFragment", " saveRoutine ${currentRoutine.name} - $tempo BPM") // Logging actual tempo value
-
             currentRoutine.tempo = tempo
-        } // Set the tempo of the routine
-
-        val routines = RoutineStorage.loadRoutines(context).toMutableList()
-        val index = routines.indexOfFirst { it.name == currentRoutine.name }
-        if (index != -1) {
-            routines[index] = currentRoutine
-        } else {
-            routines.add(currentRoutine)
+            RoutineStorage.updateRoutineTempo(context, currentRoutine.name, tempo)
         }
-        RoutineStorage.saveRoutines(context, routines)
+
+        // Update in selected instrument
+        _selectedInstrument.value?.let { instrument ->
+            val routineIndex = instrument.routines.indexOfFirst { it.name == currentRoutine.name }
+            if (routineIndex != -1) {
+                instrument.routines[routineIndex].tempo = tempo ?: 90
+                saveSelectedInstrument(instrument)
+            }
+        }
+
+        saveSelectedRoutine(currentRoutine)
     }
+
+
 }

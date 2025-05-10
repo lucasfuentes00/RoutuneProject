@@ -20,6 +20,7 @@ class SoundAdapter(
 
     class SoundViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.soundName)
+        val nameUsername: TextView = view.findViewById(R.id.soundUsername)
         val durationTextView: TextView = view.findViewById(R.id.soundDuration)
         val playLoopButton: Button = view.findViewById(R.id.playLoopButtonItem)
         val stopButton: Button = view.findViewById(R.id.stopButtonItem)
@@ -35,6 +36,7 @@ class SoundAdapter(
         val sound = soundList[position]
         holder.nameTextView.text = sound.name
         holder.durationTextView.text = "Duration: ${sound.duration}s"
+        holder.nameUsername.text = "Username: (${sound.username})"
 
         holder.playLoopButton.setOnClickListener {
             onPlayClickListener(sound)

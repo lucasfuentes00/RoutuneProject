@@ -42,13 +42,12 @@ class LoopsFragment : Fragment() {
 
         saveButton.setOnClickListener {
             val selectedRoutine = routineSelectionViewModel.selectedRoutine.value
-            val tempo = tempoGlobal
 
             if (selectedRoutine == null) {
                 Log.d("LoopsFragment", "No selected routine found.")
             } else {
-                routineSelectionViewModel.saveRoutine(requireContext(), selectedRoutine, tempo)
-                Log.d("LoopsFragment", "Routine saved: ${selectedRoutine.name}, Tempo: $tempo")
+                routineSelectionViewModel.saveRoutine(requireContext(), selectedRoutine, tempoGlobal)
+                Log.d("LoopsFragment", "Routine saved: ${selectedRoutine.name}, Tempo: $tempoGlobal")
             }
         }
 

@@ -45,4 +45,13 @@ object RoutineStorage {
             mutableListOf()
         }
     }
+    fun updateRoutineTempo(context: Context, routineName: String, newTempo: Int) {
+        val routines = loadRoutines(context).toMutableList()
+        val index = routines.indexOfFirst { it.name == routineName }
+        if (index != -1) {
+            routines[index].tempo = newTempo
+            saveRoutines(context, routines)
+        }
+    }
+
 }

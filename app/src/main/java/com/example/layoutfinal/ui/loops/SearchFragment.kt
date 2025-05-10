@@ -122,7 +122,7 @@ class SearchFragment : Fragment() {
                         val sound = Sound(
                             name = details.name,
                             duration = details.duration,
-                            license = details.license,
+                            username = details.username,
                             previewUrl = details.previews?.`preview-hq-mp3` ?: ""
                         )
                         withContext(Dispatchers.Main) {

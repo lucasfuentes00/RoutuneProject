@@ -83,7 +83,7 @@ class StatisticsFragment : Fragment() {
             dialog.setButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE, "OK") { _, _ ->
                 val routineName = input.text.toString().trim()
                 if (routineName.isNotEmpty()) {
-                    val newRoutine = Routine(name = routineName, tempo = 120)
+                    val newRoutine = Routine(name = routineName, tempo = 90)
                     instrument.routines.add(newRoutine) // modify only instrument.routines
 
                     val insertPosition = instrument.routines.size - 1

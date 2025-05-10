@@ -26,11 +26,12 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/soundLicense"
+            android:id="@+id/soundUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="License"
-            android:textSize="14sp" />
+            android:text="User"
+            android:textSize="12sp"
+            android:textStyle="bold|italic" />
 
     </LinearLayout>
 

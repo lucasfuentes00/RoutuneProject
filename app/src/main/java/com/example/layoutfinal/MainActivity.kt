@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadTempo() // Load tempo first
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Log.d("MainActivity", "Binding and content view set")
@@ -54,24 +54,5 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    // --- TEMPO MANAGEMENT ---
 
-    fun setTempo(newTempo: Int) {
-        currentTempo = newTempo
-        saveTempo()
-    }
-
-    fun getTempo(): Int {
-        return currentTempo
-    }
-
-    private fun saveTempo() {
-        val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-        prefs.edit().putInt("tempo", currentTempo).apply()
-    }
-
-    private fun loadTempo() {
-        val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-        currentTempo = prefs.getInt("tempo", 120) // Default if not saved
-    }
 }

@@ -38,8 +38,8 @@ class SoundsFragment : Fragment() {
     private var currentSoundUrl: String? = null
 
     private val apiKey = "tyVR1A4eM0P7LnURQsxtn36ABunnHH1ad9ycAMdZ"
-    private val soundIdsToFetch = listOf(39334, 245048)
-    private val bpmSample = listOf(93, 97)
+    private val soundIdsToFetch = listOf(39334, 245048,805000,804999,804998,804997)
+    private val bpmSample = listOf(93, 97,80,63,99,111)
     private var tempo = 96 // Default tempo
 
     private lateinit var routineSelectionViewModel: RoutineSelectionViewModel
@@ -117,7 +117,7 @@ class SoundsFragment : Fragment() {
                             val sound = Sound(
                                 name = details.name,
                                 duration = details.duration,
-                                license = details.license,
+                                username = details.username,
                                 previewUrl = details.previews?.`preview-hq-mp3` ?: ""
                             )
                             soundList.add(sound)

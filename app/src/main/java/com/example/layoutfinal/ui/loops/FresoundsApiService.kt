@@ -25,7 +25,7 @@ interface FreesoundApiService {
 data class Sound(
     val name: String,
     val duration: Double,
-    val license: String,
+    val username: String,
     val previewUrl: String
 )
 
@@ -37,7 +37,7 @@ data class FreesoundResponse(
 data class SoundDetails(
     val name: String,
     val duration: Double,
-    val license: String,
+    val username: String,
     val previews: Previews? = null, // make previews nullable
     val download: String? = null // also make download nullable
 )
@@ -55,7 +55,7 @@ data class SoundResult(
     val id: Int, // Add the id property
     val name: String,
     val duration: Double,
-    val license: String,
+    val username: String,
     val previews: Previews? = null
 )
 

@@ -21,6 +21,7 @@ class RoutineAdapter(
     class RoutineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val routineName: TextView = itemView.findViewById(R.id.instrumentName)
         val deleteButton: Button = itemView.findViewById(R.id.deleteButton)
+        val info: TextView = itemView.findViewById(R.id.info)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoutineViewHolder {
@@ -35,6 +36,10 @@ class RoutineAdapter(
         Log.d(TAG, "onBindViewHolder: binding routine at position $position with name: ${routine.name}")
 
         holder.routineName.text = routine.name
+        holder.info.text =
+            "🎵 Tempo: ${routine.tempo} bpm\n" +
+                    "📁 Archived: ${if (routine.archived) "Yes" else "No"}\n" +
+                    "🗓️ Date: ${routine.date}"
 
         holder.deleteButton.setOnClickListener {
             Log.d(TAG, "Delete clicked for routine: ${routine.name}")
