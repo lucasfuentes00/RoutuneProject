@@ -22,13 +22,13 @@ import kotlin.math.*
 class TunerFragment : Fragment() {
     private var audioRecord: AudioRecord? = null
     private val sampleRate = 44100
-    private var isTuning = false
+    private var isTuning = false // Flag to stop the loop
 
     private val bufferSize = AudioRecord.getMinBufferSize(
         sampleRate,
         AudioFormat.CHANNEL_IN_MONO,
         AudioFormat.ENCODING_PCM_16BIT
-    ).coerceAtLeast(1024)
+    ).coerceAtLeast(1024) // Ensure buffer size is at least 1024 bytes
 
     private lateinit var tunerTextView: TextView
     private lateinit var noteText: TextView
@@ -51,27 +51,13 @@ class TunerFragment : Fragment() {
         centsText = view.findViewById(R.id.centsText)
         tunerTextView = view.findViewById(R.id.tunerText)
 
-        animateInView(noteText, 0)
-        animateInView(centsText, 100)
-        animateInView(tunerSeekBar, 200)
-
+        // Check microphone permission
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 1)
         } else {
-            startTuner()
+            startTuner() // Start only if permission is granted
         }
-    }
-
-    private fun animateInView(view: View, delay: Long) {
-        view.translationY = -50f
-        view.alpha = 0f
-        view.animate()
-            .translationY(0f)
-            .alpha(1f)
-            .setDuration(300)
-            .setStartDelay(delay)
-            .start()
     }
 
     private fun startTuner() {
@@ -107,52 +93,84 @@ class TunerFragment : Fragment() {
                 }
 
                 val frequency = getFrequency2(audioBuffer)
-
-                if (frequency.isNaN() || frequency <= 0.0) continue //LUCAS HE METIDO ESTO PARA Q NO SE CRASHEE
-
                 val (note, cents) = getMusicalNoteAndCents(frequency)
 
                 withContext(Dispatchers.Main) {
                     updateUI(frequency, note, cents)
                 }
 
-                delay(50)
+                delay(50) // Small delay to avoid high CPU usage
             }
         }
     }
 
+
+
     private fun updateUI(frequency: Double, note: String, cents: Int) {
+
+
+        //tunerTextView.text = "Frequency: ${frequency}Hz -> Note: $note, Cents: $cents"
         noteText.text = "Nota: $note"
         centsText.text = "Cents: $cents"
 
         val progress = ((cents + 50) * 100 / 100).coerceIn(0, 100)
         tunerSeekBar.progress = progress.toInt()
 
+        // Change color if note is in tune (-5 to +5 cents)
         val colorRes = if (cents in -10..10) R.color.colorRecieveText else R.color.colorStatusText
         noteText.setTextColor(ContextCompat.getColor(requireContext(), colorRes))
     }
 
+    private fun getFrequency(audioData: ShortArray): Double {
+        val fftSize = audioData.size
+        val fftData = DoubleArray(fftSize * 2) { i ->
+            if (i < fftSize) audioData[i].toDouble() else 0.0
+        }
+
+        val fft = FFT(fftSize.toLong())
+        fft.realForward(fftData)
+
+        var maxIndex = 0
+        var maxMagnitudeSquared = 0.0
+
+        // Empezar desde el segundo "bin" para evitar la componente DC (índice 0)
+        for (i in 2 until fftSize step 2) {
+            val real = fftData[i]
+            val imag = fftData[i + 1]
+            val magnitudeSquared = real * real + imag * imag
+
+            if (magnitudeSquared > maxMagnitudeSquared) {
+                maxMagnitudeSquared = magnitudeSquared
+                maxIndex = i / 2 // El índice de frecuencia es la mitad del índice en fftData
+            }
+        }
+
+        return maxIndex * sampleRate.toDouble() / fftSize
+    }
     private fun getFrequency2(audioData: ShortArray): Double {
         val buffer = audioData.map { it.toDouble() }.toDoubleArray()
         val bufferSize = buffer.size
         val yinBuffer = DoubleArray(bufferSize / 2)
 
+        // Paso 1: Función de diferencia
         for (tau in 1 until yinBuffer.size) {
             var sum = 0.0
-            for (i in 0 until bufferSize - tau) {
+            for (i in 0 until bufferSize - tau) { // Corregido el límite del bucle
                 val delta = buffer[i] - buffer[i + tau]
                 sum += delta * delta
             }
             yinBuffer[tau] = sum
         }
 
+        // Paso 2: Diferencia media acumulativa normalizada
         yinBuffer[0] = 1.0
         var runningSum = 0.0
         for (tau in 1 until yinBuffer.size) {
             runningSum += yinBuffer[tau]
-            yinBuffer[tau] /= (runningSum / tau).coerceAtLeast(1e-9)
+            yinBuffer[tau] /= (runningSum / tau).coerceAtLeast(1e-9) // Normalización y evitar división por cero
         }
 
+        // Paso 3: Umbral absoluto
         val threshold = 0.15
         var tauEstimate = -1
         var tau = 2
@@ -167,8 +185,12 @@ class TunerFragment : Fragment() {
             tau++
         }
 
-        if (tauEstimate == -1) return -1.0
 
+        if (tauEstimate == -1) {
+            return -1.0 // No se encontró tono
+        }
+
+        // Paso 4: Interpolación parabólica (opcional para mejorar la precisión)
         val betterTau = if (tauEstimate > 0 && tauEstimate < yinBuffer.size - 1) {
             val s0 = yinBuffer[tauEstimate - 1]
             val s1 = yinBuffer[tauEstimate]
@@ -181,19 +203,22 @@ class TunerFragment : Fragment() {
         return sampleRate / betterTau
     }
 
+
+
     private fun getMusicalNoteAndCents(frequency: Double): Pair<String, Int> {
         if (frequency <= 0.0) return Pair("-", 0)
 
-        val r = 2.0.pow(1.0 / 12.0)
-        val x = ln(frequency / 440.0) / ln(r)
+        val r = 2.0.pow(1.0 / 12.0) // Ratio entre semitonos
+        val x = ln(frequency / 440.0) / ln(r) // Distancia en semitonos desde A4
         val semitoneIndex = round(x).toInt()
-        val noteIndex = semitoneIndex.mod(12)
+        val noteIndex = (semitoneIndex ).mod(12) // Ajuste para que A=0
         val note = getNoteFromIndex(noteIndex)
 
         val cents = ((x - semitoneIndex) * 100).roundToInt()
 
         return Pair(note, cents)
     }
+
 
     private fun getNoteFromIndex(index: Int): String {
         val notes = arrayOf("A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#")
