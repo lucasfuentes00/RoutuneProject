@@ -30,7 +30,7 @@ class HomeFragment : Fragment() {
     private lateinit var stopButton: Button
     private lateinit var mediaPlayer: MediaPlayer
     private var bpm: Int = 60
-    private val minBpm = 60
+    private val minBpm = 30  // 🔄 Ajustado a 30
     private val maxBpm = 200
 
     private val handler = Handler(Looper.getMainLooper())
@@ -47,7 +47,7 @@ class HomeFragment : Fragment() {
         metronomeFrame = view.findViewById(R.id.metronomeFrame)
         metronomeBar = view.findViewById(R.id.metronomeBar)
 
-        // Pivote inferior para que rote como péndulo
+        // Pivote inferior
         metronomeBar.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 metronomeBar.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -100,7 +100,7 @@ class HomeFragment : Fragment() {
 
     private fun updateBpm() {
         bpmTextView.text = "$bpm BPM"
-        val newSpeed = bpm.toFloat() / 60f
+        val newSpeed = bpm.toFloat() / 60f  // 🔄 Escala basada en 60 BPM reales
         try {
             mediaPlayer.setPlaybackParams(mediaPlayer.playbackParams.setSpeed(newSpeed))
         } catch (e: Exception) {
