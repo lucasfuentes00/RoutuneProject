@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navigation_routine"
-        android:icon="@drawable/ic_home_black_24dp"
+        android:icon="@drawable/ic_routine"
         android:title="@string/title_routine" />
     <item
         android:id="@+id/navigation_loops"
-        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:icon="@drawable/ic_loops"
         android:title="@string/title_loops" />
     <item
         android:id="@+id/navigation_tuner"
