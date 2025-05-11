@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.example.layoutfinal.ui.home.HomeFragment"
+        android:name="com.example.layoutfinal.ui.metronomo.MetronomoFragment"
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_home" />
 

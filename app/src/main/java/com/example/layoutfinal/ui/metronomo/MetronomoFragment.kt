@@ -1,4 +1,4 @@
-package com.example.layoutfinal.ui.home
+package com.example.layoutfinal.ui.metronomo
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -20,7 +20,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.layoutfinal.R
 
-class HomeFragment : Fragment() {
+class MetronomoFragment : Fragment() {
 
     private lateinit var metronomeFrame: ImageView
     private lateinit var metronomeBar: ImageView
@@ -28,9 +28,9 @@ class HomeFragment : Fragment() {
     private lateinit var bpmSeekBar: SeekBar
     private lateinit var playButton: Button
     private lateinit var stopButton: Button
-    private lateinit var mediaPlayer: MediaPlayer
+    private var mediaPlayer: MediaPlayer? = null
     private var bpm: Int = 60
-    private val minBpm = 30  // 🔄 Ajustado a 30
+    private val minBpm = 30
     private val maxBpm = 200
 
     private val handler = Handler(Looper.getMainLooper())
@@ -44,10 +44,23 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_metronomo, container, false)
 
+        // Referencias UI
         metronomeFrame = view.findViewById(R.id.metronomeFrame)
         metronomeBar = view.findViewById(R.id.metronomeBar)
+        bpmTextView = view.findViewById(R.id.bpmTextView)
+        bpmSeekBar = view.findViewById(R.id.bpmSeekBar)
+        playButton = view.findViewById(R.id.playButton)
+        stopButton = view.findViewById(R.id.stopButton)
 
-        // Pivote inferior
+        // Animación de entrada
+        animateInView(metronomeFrame, 0)
+        animateInView(metronomeBar, 100)
+        animateInView(bpmTextView, 200)
+        animateInView(bpmSeekBar, 300)
+        animateInView(playButton, 400)
+        animateInView(stopButton, 500)
+
+        // Configuración pivote de barra
         metronomeBar.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 metronomeBar.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -55,11 +68,6 @@ class HomeFragment : Fragment() {
                 metronomeBar.pivotY = metronomeBar.height.toFloat()
             }
         })
-
-        bpmTextView = view.findViewById(R.id.bpmTextView)
-        bpmSeekBar = view.findViewById(R.id.bpmSeekBar)
-        playButton = view.findViewById(R.id.playButton)
-        stopButton = view.findViewById(R.id.stopButton)
 
         initializeMediaPlayer()
         bpmTextView.text = "$bpm BPM"
@@ -79,32 +87,58 @@ class HomeFragment : Fragment() {
 
         playButton.setOnClickListener {
             if (!isAnimating) {
+                ensureMediaPlayerReady()
+                updateBpm()
                 startMetronomeAnimation()
-                mediaPlayer.start()
+                mediaPlayer?.start()
             }
         }
 
         stopButton.setOnClickListener {
             stopMetronomeAnimation()
-            mediaPlayer.pause()
+            mediaPlayer?.pause()
         }
 
         return view
     }
 
+    private fun animateInView(view: View, delay: Long) {
+        view.translationY = -50f
+        view.alpha = 0f
+        view.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(300)
+            .setStartDelay(delay)
+            .start()
+    }
+
     private fun initializeMediaPlayer() {
-        mediaPlayer = MediaPlayer.create(context, R.raw.tic_tac_sound).apply {
-            isLooping = true
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(context, R.raw.tic_tac_sound).apply {
+                isLooping = true
+            }
+        }
+    }
+
+    private fun ensureMediaPlayerReady() {
+        if (mediaPlayer == null) {
+            initializeMediaPlayer()
+        }
+        if (mediaPlayer?.isPlaying == false) {
+            mediaPlayer?.seekTo(0)
         }
     }
 
     private fun updateBpm() {
         bpmTextView.text = "$bpm BPM"
-        val newSpeed = bpm.toFloat() / 60f  // 🔄 Escala basada en 60 BPM reales
+        val newSpeed = bpm.toFloat() / 60f
         try {
-            mediaPlayer.setPlaybackParams(mediaPlayer.playbackParams.setSpeed(newSpeed))
+            mediaPlayer?.playbackParams?.let {
+                mediaPlayer?.setPlaybackParams(it.setSpeed(newSpeed))
+            }
         } catch (e: Exception) {
-            Log.e("HomeFragment", "Error setting playback speed", e)
+            Log.e("MetronomeFragment", "Error setting playback speed", e)
         }
     }
 
@@ -150,10 +184,16 @@ class HomeFragment : Fragment() {
         reset.start()
     }
 
+    override fun onPause() {
+        super.onPause()
+        stopMetronomeAnimation()
+        mediaPlayer?.pause()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        if (mediaPlayer.isPlaying) mediaPlayer.stop()
-        mediaPlayer.release()
         stopMetronomeAnimation()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 }
