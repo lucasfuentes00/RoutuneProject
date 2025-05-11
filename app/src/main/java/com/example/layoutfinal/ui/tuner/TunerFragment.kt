@@ -108,7 +108,7 @@ class TunerFragment : Fragment() {
 
                 val frequency = getFrequency2(audioBuffer)
 
-                if (frequency.isNaN() || frequency <= 0.0) continue // LUCAS HE METIDO ESTO PARA Q NO SE CRASHEE
+                if (frequency.isNaN() || frequency <= 0.0) continue //LUCAS HE METIDO ESTO PARA Q NO SE CRASHEE
 
                 val (note, cents) = getMusicalNoteAndCents(frequency)
 
