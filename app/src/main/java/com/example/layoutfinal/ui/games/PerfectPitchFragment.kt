@@ -18,6 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.layoutfinal.R
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 
 class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
 
@@ -28,12 +34,22 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
     private var isEditSelectionMode = false
     private var isRoundActive = false
     private var currentNote = -1
+    private var lastSoundIndex = -1
+
     private var lastNote: Int? = null
     private var startTime: Long = 0
 
     private var oldPlayVisibility = View.GONE
     private var oldPlayAgainVisibility = View.GONE
     private var oldPlayNextNoteVisibility = View.GONE
+
+    private var isLowerOctaveEnabled = false
+    private var isCentralOctaveEnabled = true
+    private var isUpperOctaveEnabled = false
+
+    private lateinit var chartAccuracy: BarChart
+    private lateinit var chartResponseTime: BarChart
+    private lateinit var statsLayout: View
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,22 +62,61 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
         val btnEditSelection = view.findViewById<Button>(R.id.btn_edit_selection)
         val btnDone = view.findViewById<Button>(R.id.btn_done)
         val btnViewStatistics = view.findViewById<Button>(R.id.btn_view_statistics)
-        val statsLayout = view.findViewById<View>(R.id.statistics_layout)
+        val btnResetStatistics = view.findViewById<Button>(R.id.btn_reset_statistics)
+
+        chartAccuracy = view.findViewById(R.id.chart_accuracy)
+        chartResponseTime = view.findViewById(R.id.chart_response_time)
+        statsLayout = view.findViewById(R.id.statistics_layout)
+
 
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
 
+        val btnLowerOctave = view.findViewById<Button>(R.id.btn_lower_octave)
+        val btnCentralOctave = view.findViewById<Button>(R.id.btn_central_octave)
+        val btnUpperOctave = view.findViewById<Button>(R.id.btn_upper_octave)
+
+        val names = listOf("C","C#","D","D#","E","F","F#","G","G#","A","A#","B")
+
+// Octave toggles
+        btnLowerOctave.setOnClickListener {
+            if (canDeactivateOctave(isLowerOctaveEnabled)) {
+                isLowerOctaveEnabled = !isLowerOctaveEnabled
+                updateOctaveButtonAppearance(btnLowerOctave, isLowerOctaveEnabled)
+            }
+        }
+        btnCentralOctave.setOnClickListener {
+            if (canDeactivateOctave(isCentralOctaveEnabled)) {
+                isCentralOctaveEnabled = !isCentralOctaveEnabled
+                updateOctaveButtonAppearance(btnCentralOctave, isCentralOctaveEnabled)
+            }
+        }
+        btnUpperOctave.setOnClickListener {
+            if (canDeactivateOctave(isUpperOctaveEnabled)) {
+                isUpperOctaveEnabled = !isUpperOctaveEnabled
+                updateOctaveButtonAppearance(btnUpperOctave, isUpperOctaveEnabled)
+            }
+        }
+
+
+
         soundPool = SoundPool.Builder()
             .setMaxStreams(1)
             .setAudioAttributes(audioAttributes)
             .build()
 
-        for (i in 0 until 12) {
+        soundMap.clear()
+        for (i in 0..36) {
             val resId = resources.getIdentifier("note$i", "raw", requireContext().packageName)
-            soundMap[i] = soundPool.load(requireContext(), resId, 1)
+            if (resId != 0) {
+                soundMap[i] = soundPool.load(requireContext(), resId, 1)
+            } else {
+                Log.w("SoundLoad", "Archivo de sonido note$i no encontrado")
+            }
         }
+
 
         val noteButtonMap = mapOf(
             0 to R.id.key_C,
@@ -78,40 +133,44 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
             11 to R.id.key_B,
         )
 
-        for ((i, buttonId) in noteButtonMap) {
-            val btnNote = view.findViewById<Button>(buttonId)
-            btnNote?.let { button ->
-                button.setOnClickListener {
-                    if (isEditSelectionMode) {
-                        noteSelection[i] = !noteSelection[i]
-                        updateButtonAppearance(button, noteSelection[i])
-                        return@setOnClickListener
-                    }
 
-                    if (!isRoundActive || !noteSelection[i]) return@setOnClickListener
-
-                    val responseTime = SystemClock.elapsedRealtime() - startTime
-                    if (i == currentNote) {
-                        feedbackTextView.text = "¡Correct!"
-                        feedbackTextView.setTextColor(requireContext().getColor(android.R.color.holo_green_dark))
-                        btnShowAnswer.visibility = View.GONE
-                        currentNote = -1
-                    } else {
-                        feedbackTextView.text = "Incorrect"
-                        feedbackTextView.setTextColor(requireContext().getColor(android.R.color.holo_red_dark))
-                        vibratePhone()
-                        btnShowAnswer.visibility = View.VISIBLE
-                    }
-
-                    feedbackTextView.visibility = View.VISIBLE
-                    isRoundActive = false
-                    btnPlay.visibility = View.GONE
-                    btnPlayAgain.visibility = View.VISIBLE
-                    btnPlayNextNote.visibility = View.VISIBLE
+        for ((i, btnId) in noteButtonMap) {
+            val button = view.findViewById<Button>(btnId)!!
+            // listener
+            button.setOnClickListener {
+                if (isEditSelectionMode) {
+                    noteSelection[i] = !noteSelection[i]
+                    updateButtonAppearance(button, noteSelection[i])
+                    return@setOnClickListener
                 }
+                if (!isRoundActive || !noteSelection[i]) return@setOnClickListener
 
-                updateButtonAppearance(button, noteSelection[i])
+                val responseTime = SystemClock.elapsedRealtime() - startTime
+                val wasCorrect   = (i == currentNote)
+
+                if (wasCorrect) {
+                    feedbackTextView.text = "¡Correct!"
+                    feedbackTextView.setTextColor(requireContext().getColor(android.R.color.holo_green_dark))
+                    btnShowAnswer.visibility = View.GONE
+                } else {
+                    feedbackTextView.text = "Incorrect"
+                    feedbackTextView.setTextColor(requireContext().getColor(android.R.color.holo_red_dark))
+                    vibratePhone()
+                    btnShowAnswer.visibility = View.VISIBLE
+                }
+                onUserAnswered(wasCorrect, names[i], responseTime)
+
+                feedbackTextView.visibility = View.VISIBLE
+                isRoundActive = false
+                btnPlay.visibility = View.GONE
+                btnPlayAgain.visibility = View.VISIBLE
+                btnPlayNextNote.visibility = View.VISIBLE
+
+                if (wasCorrect) {
+                    currentNote = -1
+                }
             }
+            updateButtonAppearance(button, noteSelection[i])
         }
 
         btnPlay.setOnClickListener {
@@ -119,9 +178,7 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
         }
 
         btnPlayAgain.setOnClickListener {
-            lastNote?.let {
-                soundPool.play(soundMap[it] ?: 0, 1f, 1f, 1, 0, 1f)
-            }
+            soundPool.play(soundMap[lastSoundIndex] ?: 0, 1f, 1f, 1, 0, 1f)
         }
 
         btnPlayNextNote.setOnClickListener {
@@ -129,11 +186,8 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
         }
 
         btnShowAnswer.setOnClickListener {
-            val noteNames = arrayOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
-            val answerIndex = if (currentNote != -1) currentNote else lastNote
-            answerIndex?.let {
-                feedbackTextView.text = "${feedbackTextView.text}. La respuesta era: ${noteNames[it]}"
-            }
+            val idx = if (currentNote != -1) currentNote else (lastSoundIndex % 12)
+            feedbackTextView.text = "La respuesta era: ${names[idx]}"
             btnShowAnswer.visibility = View.GONE
         }
 
@@ -160,9 +214,22 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
         }
 
         btnViewStatistics.setOnClickListener {
-            statsLayout.visibility =
-                if (statsLayout.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            if (statsLayout.visibility != View.VISIBLE) {
+                loadStatisticsIntoCharts()
+                statsLayout.visibility = View.VISIBLE
+                btnResetStatistics.visibility = View.VISIBLE
+            } else {
+                statsLayout.visibility = View.GONE
+                btnResetStatistics.visibility = View.GONE
+            }
         }
+
+        btnResetStatistics.setOnClickListener {
+            val prefs = requireContext().getSharedPreferences("stats", Context.MODE_PRIVATE)
+            prefs.edit().clear().apply()
+            loadStatisticsIntoCharts()
+        }
+
         requireActivity().title = "Perfect Pitch"
 
         (requireActivity() as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -187,11 +254,45 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
         btnPlay.visibility = View.GONE
 
         val availableNotes = noteSelection.withIndex().filter { it.value }.map { it.index }
-        if (availableNotes.isNotEmpty()) {
-            currentNote = availableNotes.random()
-            lastNote = currentNote
+        val activeOctaves = mutableListOf<Int>()
+        if (isLowerOctaveEnabled) activeOctaves.add(0)  // Example: 0 for lower
+        if (isCentralOctaveEnabled) activeOctaves.add(1) // 1 for central
+        if (isUpperOctaveEnabled) activeOctaves.add(2)  // 2 for upper
+
+        if (availableNotes.isNotEmpty() && activeOctaves.isNotEmpty()) {
+            val noteIndex      = availableNotes.random()    // 0–11
+            val selectedOctave = activeOctaves.random()     // 0,1 o 2
+
+            currentNote = noteIndex
+
+            // Calcula el fichero que toca
+            lastSoundIndex = noteIndex + selectedOctave * 12  // 0…35 (o 36 si hay Do extra)
             startTime = SystemClock.elapsedRealtime()
-            soundPool.play(soundMap[currentNote] ?: 0, 1f, 1f, 1, 0, 1f)
+
+
+            soundPool.play(soundMap[lastSoundIndex] ?: 0, 1f, 1f, 1, 0, 1f)
+        }
+    }
+
+
+    private fun onUserAnswered(correct: Boolean, note: String, responseTimeSec: Long) {
+        val prefs = requireContext().getSharedPreferences("stats", Context.MODE_PRIVATE)
+        with(prefs.edit()) {
+            val totalKey   = "${note}_total"
+            val correctKey = "${note}_correct"
+            val timeKey    = "${note}_timeSum"
+
+            putInt(totalKey, prefs.getInt(totalKey, 0) + 1)
+            if (correct) {
+                putInt(correctKey, prefs.getInt(correctKey, 0) + 1)
+                putLong(timeKey, prefs.getLong(timeKey, 0L) + responseTimeSec)  // Solo acumula tiempo si fue correcta
+            }
+
+            apply()
+        }
+
+        if (statsLayout.visibility == View.VISIBLE) {
+            loadStatisticsIntoCharts()
         }
     }
 
@@ -214,6 +315,8 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
             else -> false
         }
 
+        button.backgroundTintList = null
+
         val drawableRes = when {
             isBlack && isSelected -> R.drawable.black_key_enabled
             isBlack && !isSelected -> R.drawable.black_key_disabled
@@ -231,6 +334,117 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
         (button.parent as? View)?.invalidate()
     }
 
+    private fun updateOctaveButtonAppearance(button: Button, isEnabled: Boolean) {
+        button.alpha = if (isEnabled) 1.0f else 0.5f
+        val colorRes = if (isEnabled) R.color.octave_active else R.color.octave_inactive
+        button.setBackgroundColor(ContextCompat.getColor(requireContext(), colorRes))
+
+    }
+
+    private fun loadStatisticsIntoCharts() {
+        val prefs = requireContext().getSharedPreferences("stats", Context.MODE_PRIVATE)
+        val noteNames = listOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+
+        // Calcular estadísticas totales
+        var totalAnswers = 0
+        var correctAnswers = 0
+
+        noteNames.forEach { note ->
+            totalAnswers += prefs.getInt("${note}_total", 0)
+            correctAnswers += prefs.getInt("${note}_correct", 0)
+        }
+        val incorrectAnswers = totalAnswers - correctAnswers
+
+        // Mostrar resumen en el TextView
+        val statsSummaryText = requireView().findViewById<TextView>(R.id.stats_summary)
+        statsSummaryText.text = """
+        Respuestas totales: $totalAnswers
+        Respuestas correctas: $correctAnswers
+        Respuestas incorrectas: $incorrectAnswers
+    """.trimIndent()
+        statsSummaryText.visibility = View.VISIBLE
+
+        // Gráfica de Porcentaje de Respuestas Correctas
+        val entriesAcc = noteNames.mapIndexed { i, note ->
+            val total = prefs.getInt("${note}_total", 0)
+            val correct = prefs.getInt("${note}_correct", 0)
+            val pct = if (total > 0) correct * 100f / total else 0f
+            BarEntry(i.toFloat(), pct)
+        }
+        val setAcc = BarDataSet(entriesAcc, "").apply {
+            setDrawValues(false)
+            color = Color.BLUE
+        }
+        val dataAcc = BarData(setAcc).apply { barWidth = 0.5f }
+        chartAccuracy.apply {
+            description.isEnabled = false
+            legend.isEnabled = false
+            data = dataAcc
+
+            xAxis.apply {
+                valueFormatter = IndexAxisValueFormatter(noteNames)
+                position = XAxis.XAxisPosition.BOTTOM
+                granularity = 1f
+                isGranularityEnabled = true
+                setLabelCount(noteNames.size, true)
+                textSize = 10f
+                setDrawGridLines(false)
+                setAvoidFirstLastClipping(true)
+                axisMinimum = 0f
+                axisMaximum = (noteNames.size - 1).toFloat()
+            }
+
+            axisLeft.apply {
+                axisMinimum = 0f
+                axisMaximum = 100f
+            }
+            axisRight.isEnabled = false
+
+            notifyDataSetChanged()
+            invalidate()
+        }
+
+        // Gráfica de Tiempo de Respuesta (en segundos)
+        val entriesTime = noteNames.mapIndexed { i, note ->
+            val total = prefs.getInt("${note}_total", 0)
+            val timeSum = prefs.getLong("${note}_timeSum", 0L)
+            val avg = if (total > 0) timeSum.toFloat() / total / 1000f else 0f  // Convertimos a segundos
+            BarEntry(i.toFloat(), avg)
+        }
+        val setTime = BarDataSet(entriesTime, "").apply {
+            setDrawValues(false)
+            color = Color.RED
+        }
+        val dataTime = BarData(setTime).apply { barWidth = 0.5f }
+        chartResponseTime.apply {
+            description.isEnabled = false
+            legend.isEnabled = false
+            data = dataTime
+
+            xAxis.apply {
+                valueFormatter = IndexAxisValueFormatter(noteNames)
+                position = XAxis.XAxisPosition.BOTTOM
+                granularity = 1f
+                isGranularityEnabled = true
+                setLabelCount(noteNames.size, true)
+                textSize = 10f
+                setDrawGridLines(false)
+                setAvoidFirstLastClipping(true)
+                axisMinimum = 0f
+                axisMaximum = (noteNames.size - 1).toFloat()
+            }
+
+            axisLeft.apply {
+                axisMinimum = 0f
+                // Puedes poner un axisMaximum si quieres limitar la escala vertical de segundos
+            }
+            axisRight.isEnabled = false
+
+            notifyDataSetChanged()
+            invalidate()
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
@@ -239,6 +453,17 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun canDeactivateOctave(currentlyActive: Boolean): Boolean {
+        // Cuenta cuántas octavas están activas
+        val activeCount = listOf(
+            isLowerOctaveEnabled,
+            isCentralOctaveEnabled,
+            isUpperOctaveEnabled
+        ).count { it }
+        // Si solo hay una activa y es esta, no permitimos desactivarla
+        return !(currentlyActive && activeCount == 1)
     }
 
     override fun onDestroyView() {

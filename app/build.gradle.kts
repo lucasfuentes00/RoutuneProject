@@ -70,7 +70,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0") // Or the latest version
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1") // Or the latest version for coroutines
 
-
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 
 

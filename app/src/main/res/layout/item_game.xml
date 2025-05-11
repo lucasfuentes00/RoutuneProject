@@ -3,5 +3,10 @@
     android:id="@+id/gameTitle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="center"
     android:padding="16dp"
-    android:textSize="18sp" />
+    android:textSize="22sp"
+    android:textStyle="bold"
+    android:gravity="center"
+    android:background="@drawable/button_outline"
+    android:textColor="@android:color/black" />
