@@ -255,9 +255,9 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
 
         val availableNotes = noteSelection.withIndex().filter { it.value }.map { it.index }
         val activeOctaves = mutableListOf<Int>()
-        if (isLowerOctaveEnabled) activeOctaves.add(0)  // Example: 0 for lower
-        if (isCentralOctaveEnabled) activeOctaves.add(1) // 1 for central
-        if (isUpperOctaveEnabled) activeOctaves.add(2)  // 2 for upper
+        if (isLowerOctaveEnabled) activeOctaves.add(0)
+        if (isCentralOctaveEnabled) activeOctaves.add(1)
+        if (isUpperOctaveEnabled) activeOctaves.add(2)
 
         if (availableNotes.isNotEmpty() && activeOctaves.isNotEmpty()) {
             val noteIndex      = availableNotes.random()    // 0–11
@@ -266,7 +266,7 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
             currentNote = noteIndex
 
             // Calcula el fichero que toca
-            lastSoundIndex = noteIndex + selectedOctave * 12  // 0…35 (o 36 si hay Do extra)
+            lastSoundIndex = noteIndex + selectedOctave * 12  // 0…36
             startTime = SystemClock.elapsedRealtime()
 
 
@@ -436,7 +436,6 @@ class PerfectPitchFragment : Fragment(R.layout.fragment_perfect_pitch) {
 
             axisLeft.apply {
                 axisMinimum = 0f
-                // Puedes poner un axisMaximum si quieres limitar la escala vertical de segundos
             }
             axisRight.isEnabled = false
 
