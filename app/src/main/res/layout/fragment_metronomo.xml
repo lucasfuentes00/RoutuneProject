@@ -1,60 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center">
+    android:padding="16dp"
+    android:background="#FFFFFF">
 
-    <!-- Imagen del Metronomo (más pequeña y movida hacia arriba) -->
-    <ImageView
-        android:id="@+id/metronomoImage"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="-50dp"
-        android:src="@drawable/ic_metronomo"
-        android:contentDescription="Metronomo Icon" />
 
-    <!-- Texto que muestra el BPM -->
+    <FrameLayout
+        android:id="@+id/metronomeContainer"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/metronomeFrame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_metronome_frame"
+            android:contentDescription="@string/title_metronomo" />
+
+        <ImageView
+            android:id="@+id/metronomeBar"
+            android:layout_width="230dp"
+            android:layout_height="202dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="4.4dp"
+            android:layout_marginTop="-16dp"
+            android:contentDescription="Metronome Bar"
+            android:src="@drawable/ic_metronome_bar" />
+    </FrameLayout>
+
     <TextView
         android:id="@+id/bpmTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="120 BPM"
-        android:textSize="24sp"
-        android:textColor="#000"
-        android:layout_marginTop="20dp"/>
+        android:textSize="32sp"
+        android:textColor="#000000"
+        app:layout_constraintTop_toBottomOf="@id/metronomeContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
 
-    <!-- Botón para iniciar el metrónomo -->
+    <SeekBar
+        android:id="@+id/bpmSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:max="200"
+        android:progress="80"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bpmTextView" />
+
     <Button
         android:id="@+id/playButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Start Metronome" />
+        android:text="Start"
+        app:layout_constraintTop_toBottomOf="@id/bpmSeekBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/stopButton"
+        app:layout_constraintHorizontal_weight="1"
+        android:layout_marginTop="16dp"/>
 
-    <!-- Botón para detener el metrónomo -->
     <Button
         android:id="@+id/stopButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Stop Metronome" />
+        android:text="Stop"
+        app:layout_constraintTop_toBottomOf="@id/bpmSeekBar"
+        app:layout_constraintStart_toEndOf="@id/playButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        android:layout_marginTop="16dp"/>
 
-    <!-- Botones para ajustar la velocidad -->
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp">
-
-        <Button
-            android:id="@+id/increaseButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="+" />
-
-        <Button
-            android:id="@+id/decreaseButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="-" />
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
