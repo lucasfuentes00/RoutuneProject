@@ -1,0 +1,54 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/soundName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sound Name"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/soundDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Duration"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/soundUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User"
+            android:textSize="12sp"
+            android:textStyle="bold|italic" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/playLoopButtonItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play Loop"
+        android:layout_marginStart="8dp" />
+
+    <Button
+        android:id="@+id/stopButtonItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        android:enabled="false"
+        android:layout_marginStart="8dp" />
+
+
+</LinearLayout>

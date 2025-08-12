@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#64B5F6</color> <!-- Light Blue -->
+    <color name="colorPrimaryDark">#1976D2</color> <!-- Darker Blue -->
+    <color name="colorAccent">#03A9F4</color> <!-- Accent Blue -->
+    <color name="colorPrimaryLight">#E5F3FF</color>
+
+      <!--USB settings-->
+    <color name="colorRecieveText">#00FF00</color>
+    <color name="colorSendText">#82CAFF</color>
+    <color name="colorStatusText">#FFDB58</color>
+
+    <color name="white_key_enabled">#FFFFFF</color>
+    <color name="black_key_enabled">#000000</color>
+    <color name="white_key_disabled">#CCCCCC</color>
+    <color name="black_key_disabled">#333333</color>
+
+    <color name="octave_active">#64B5F6</color>
+    <color name="octave_inactive">#64B5F6</color>
+</resources>

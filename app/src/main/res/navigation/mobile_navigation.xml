@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    android:background="?attr/android:windowBackground"
+    app:startDestination="@+id/navigation_tuner">
+
+    <fragment
+        android:id="@+id/navigation_routine"
+        android:name="com.example.layoutfinal.ui.routine.RoutineFragment"
+        android:label="@string/title_routine"
+        tools:layout="@layout/fragment_routine" />
+    <fragment
+        android:id="@+id/navigation_loops"
+        android:name="com.example.layoutfinal.ui.loops.LoopsFragment"
+        android:label="@string/title_loops"
+        tools:layout="@layout/fragment_loops" />
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.layoutfinal.ui.metronomo.MetronomoFragment"
+        android:label="@string/title_settings"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_tuner"
+        android:name="com.example.layoutfinal.ui.tuner.TunerFragment"
+        android:label="@string/title_tuner"
+        tools:layout="@layout/fragment_tuner" />
+
+    <fragment
+        android:id="@+id/navigation_notifications"
+        android:name="com.example.layoutfinal.ui.games.GamesFragment"
+        android:label="Games"
+        tools:layout="@layout/fragment_games">
+        <action
+            android:id="@+id/action_gamesFragment_to_perfectPitchFragment"
+            app:destination="@id/perfectPitchFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/perfectPitchFragment"
+        android:name="com.example.layoutfinal.ui.games.PerfectPitchFragment"
+        android:label="Perfect Pitch"
+        tools:layout="@layout/fragment_perfect_pitch" />
+
+</navigation>

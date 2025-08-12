@@ -1,0 +1,16 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.LayoutFinal" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
+        <item name="colorOnPrimary">#FFFFFF</item> <!-- White text/icons -->
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/colorPrimaryLight</item>
+
+    </style>
+    <style name="AccentButton">
+        <item name="android:backgroundTint">@color/colorAccent</item>  <!-- Change color as needed -->
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+</resources>

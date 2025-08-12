@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_routine"
+        android:icon="@drawable/ic_routine"
+        android:title="@string/title_routine" />
+    <item
+        android:id="@+id/navigation_loops"
+        android:icon="@drawable/ic_loops"
+        android:title="@string/title_loops" />
+    <item
+        android:id="@+id/navigation_tuner"
+        android:icon="@drawable/ic_tuner"
+        android:title="@string/title_tuner" />
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_metronomo"
+        android:title="@string/title_metronomo" />
+
+    <item
+        android:id="@+id/navigation_notifications"
+        android:icon="@drawable/ic_juegos"
+        android:title="@string/title_juegos" />
+
+</menu>

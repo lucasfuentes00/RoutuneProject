@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:background="#e0f0ff">
+
+        <!-- 1) EL PIANO -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="16dp">
+
+            <!-- Teclas BLANCAS -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/white_keys_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:id="@+id/key_C"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:backgroundTint="@null"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/key_D"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <Button
+                    android:id="@+id/key_D"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:backgroundTint="@null"
+                    app:layout_constraintStart_toEndOf="@id/key_C"
+                    app:layout_constraintEnd_toStartOf="@+id/key_E"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <Button
+                    android:id="@+id/key_E"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:backgroundTint="@null"
+                    app:layout_constraintStart_toEndOf="@id/key_D"
+                    app:layout_constraintEnd_toStartOf="@+id/key_F"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <Button
+                    android:id="@+id/key_F"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:backgroundTint="@null"
+                    app:layout_constraintStart_toEndOf="@id/key_E"
+                    app:layout_constraintEnd_toStartOf="@+id/key_G"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <Button
+                    android:id="@+id/key_G"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:backgroundTint="@null"
+                    app:layout_constraintStart_toEndOf="@id/key_F"
+                    app:layout_constraintEnd_toStartOf="@+id/key_A"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <Button
+                    android:id="@+id/key_A"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:backgroundTint="@null"
+                    app:layout_constraintStart_toEndOf="@id/key_G"
+                    app:layout_constraintEnd_toStartOf="@+id/key_B"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <Button
+                    android:id="@+id/key_B"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:backgroundTint="@null"
+                    app:layout_constraintStart_toEndOf="@id/key_A"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Teclas NEGRAS -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/black_keys_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:id="@+id/key_Csharp"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@android:color/black"
+                    android:backgroundTint="@null"
+                    app:layout_constraintWidth_percent="0.08"
+                    app:layout_constraintHeight_percent="0.65"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:translationX="40dp"/>
+
+                <Button
+                    android:id="@+id/key_Dsharp"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@android:color/black"
+                    android:backgroundTint="@null"
+                    app:layout_constraintWidth_percent="0.08"
+                    app:layout_constraintHeight_percent="0.65"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:translationX="95dp"/>
+
+                <Button
+                    android:id="@+id/key_Fsharp"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@android:color/black"
+                    android:backgroundTint="@null"
+                    app:layout_constraintWidth_percent="0.08"
+                    app:layout_constraintHeight_percent="0.65"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:translationX="200dp"/>
+
+                <Button
+                    android:id="@+id/key_Gsharp"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@android:color/black"
+                    android:backgroundTint="@null"
+                    app:layout_constraintWidth_percent="0.08"
+                    app:layout_constraintHeight_percent="0.65"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:translationX="255dp"/>
+
+                <Button
+                    android:id="@+id/key_Asharp"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@android:color/black"
+                    android:backgroundTint="@null"
+                    app:layout_constraintWidth_percent="0.08"
+                    app:layout_constraintHeight_percent="0.65"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:translationX="310dp"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </FrameLayout>
+
+        <!-- 2) LOS TOGGLES DE OCTAVA -->
+        <LinearLayout
+            android:id="@+id/octave_selection_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_lower_octave"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Lower\noctave"
+                android:gravity="center"
+                android:alpha="0.5"/>
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_central_octave"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Central octave"
+                android:alpha="1.0"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_upper_octave"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Upper octave"
+                android:alpha="0.5"/>
+        </LinearLayout>
+
+        <!-- 3) Feedback -->
+        <TextView
+            android:id="@+id/txt_feedback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="18sp"
+            android:textAlignment="center"
+            android:visibility="gone"
+            android:padding="8dp"/>
+
+        <!-- 4) Resto de botones -->
+        <Button
+            android:id="@+id/btn_play"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Play"/>
+
+        <Button
+            android:id="@+id/btn_play_again"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Play Again"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btn_play_next_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Play Next Note"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btn_show_answer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Answer"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btn_edit_selection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Edit Selection"/>
+
+        <Button
+            android:id="@+id/btn_done"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Done"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btn_view_statistics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Statistics"/>
+
+        <LinearLayout
+            android:id="@+id/statistics_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/stats_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Porcentaje de respuestas correctas"
+                android:textStyle="bold"/>
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/chart_accuracy"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiempo medio de respuesta (s)"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"/>
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/chart_response_time"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"/>
+            <Button
+                android:id="@+id/btn_reset_statistics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Reset Statistics"
+                android:visibility="gone"
+                android:layout_marginTop="160dp"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+</ScrollView>
