@@ -5,7 +5,7 @@ It allows you to organize practice sessions, provides rhythmic tools, assists wi
 
 📺 **Demo video**: [Watch on YouTube](https://youtu.be/6gepTbVJLnA)
 
-![Interface](RoutuneProject/assets/Interface.png)
+![Interface](assets/Interface.png)
 
 ---
 
@@ -15,7 +15,7 @@ It allows you to organize practice sessions, provides rhythmic tools, assists wi
 - Create and manage routines for different instruments.
 - Store metadata about progress and development.
 - Persistent settings to resume where you left off.
-![Rutine](RoutuneProject/assets/Rutine.png)
+![Rutine](assets/Rutine.png)
 
 
 ### 🥁 Training Loops
@@ -25,7 +25,7 @@ Two sections:
 - Load your favorite drum loops to practice with different rhythms and speeds.
 - Integration with [**Freesound API**](https://freesound.org/) to search and loop new sounds for inspiration.
 - Tempo control synced with the metronome.
-![Loops](RoutuneProject/assets/Loops.png)
+![Loops](assets/Loops.png)
 
 
 ### 🎸 Chromatic Tuner
@@ -36,18 +36,18 @@ A visual bar and color feedback (green for ±10 cents) help ensure precise tunin
 - Real-time pitch detection from the microphone.
 - Fundamental frequency analysis via FFT.
 - Helps tune any instrument accurately.
-![Tuner](RoutuneProject/assets/Tuner.png)
+![Tuner](assets/Tuner.png)
 
 ### ⏱️ Metronome
 - Fully adjustable: tempo, time signature, sound, and more.
 - Smooth pendulum-style animation.
 - Sound playback synchronized with BPM.
-![Metronome](RoutuneProject/assets/Metronome.png)
+![Metronome](assets/Metronome.png)
 
 
 ### 🎮 Mini-games for Ear Training
 - Interactive games to practice theoretical concepts and perfect pitch recognition.
-![Games](RoutuneProject/assets/Games.png)
+![Games](assets/Games.png)
 
 ---
 
@@ -78,7 +78,7 @@ A visual bar and color feedback (green for ±10 cents) help ensure precise tunin
 ---
 ## 🎨 Theme Support
 The app supports both light and dark themes, adapting automatically to the system setting. This ensures a consistent look, comfortable viewing in any lighting, and proper contrast for readability.
-![Themes](RoutuneProject/assets/Themes.png)
+![Themes](assets/Themes.png)
 
 
 ## 📚 References & Credits
